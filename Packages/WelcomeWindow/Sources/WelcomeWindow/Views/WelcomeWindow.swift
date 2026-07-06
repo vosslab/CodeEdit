@@ -71,9 +71,9 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
     }
 }
 
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 // 1)  NEITHER a custom recents list NOR a subtitle view
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyView {
     /// Creates a welcome window without a custom recent-projects list
     /// *and* without a custom subtitle view.
@@ -94,9 +94,9 @@ extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyVie
     }
 }
 
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 // 2)  ONLY a custom subtitle view
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 extension WelcomeWindow where RecentsView == EmptyView {
     /// Creates a welcome window that shows a custom subtitle view
     /// but no custom recent-projects list.
@@ -118,9 +118,9 @@ extension WelcomeWindow where RecentsView == EmptyView {
     }
 }
 
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 // 3)  ONLY a custom recent-projects list
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 extension WelcomeWindow where SubtitleView == EmptyView {
     /// Creates a welcome window that shows a custom recent-projects list
     /// but no custom subtitle view.

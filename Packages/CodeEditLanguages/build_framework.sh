@@ -85,16 +85,16 @@ OLD_PWD="$PWD"
 for lang in $LIST ; do
     # determine how many targets a given package has
     cd $lang
-    
+
     # get package info as JSON
     manifest=$(swift package dump-package)
 
     # use jq to get the target path
     targets=$(echo $manifest | jq -r '.targets[] | select(.type != "test") | .path')
-    
+
     # use jq to count number of targets
     count=$(echo $manifest | jq '[.targets[] | select(.type != "test")] | length')
-    
+
     # Determine if target paths are all '.'
     same=1
     for target in $targets; do
@@ -107,7 +107,7 @@ for lang in $LIST ; do
     # loop through targets
     for target in $targets; do
         name=${lang##*/}
-        
+
         # if there is only one target, use name
         # otherwise use target
         if [[ $count -eq 1 || ($count -ne 1 && $same -eq 1) ]]; then
@@ -115,11 +115,11 @@ for lang in $LIST ; do
         else
             mkdir -p $RESOURCES_PATH/$target
         fi
-            
+
         highlights=$( find $lang/$target -type f -name "*.scm" )
         for highlight in $highlights ; do
             highlight_name=${highlight##*/}
-            
+
             # if there is only one target, use name
             # otherwise use target
             if [[ $count -eq 1 || ($count -ne 1 && $same -eq 1) ]]; then
@@ -128,7 +128,7 @@ for lang in $LIST ; do
                 cp $highlight $RESOURCES_PATH/$target/$highlight_name
             fi
         done
-        
+
         # If target paths are all '.', break out of loop
         if [[ $same -eq 1 || ($count -ne 1 && $same -eq 1) ]]; then
             break

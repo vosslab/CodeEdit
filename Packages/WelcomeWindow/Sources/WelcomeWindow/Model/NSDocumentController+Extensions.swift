@@ -13,7 +13,7 @@ extension NSDocumentController {
 
     /// Displays a save dialog for **single, flat-file** document types
     /// (e.g. `MyNote.txt`, `Foo.circuitproj`).
-    /// The selected URL is passed to `NSDocument.write(…)`, then the document
+    /// The selected URL is passed to `NSDocument.write(...)`, then the document
     /// is opened via `openDocument(at:)`.
     ///
     /// - Parameters:
@@ -42,13 +42,13 @@ extension NSDocumentController {
     ///
     /// ```text
     /// <Folder>/
-    /// ├─ <Folder>.<ext>   ← primary file written by `write(…)`
-    /// └─ <assets…>
+    /// +- <Folder>.<ext>   <- primary file written by `write(...)`
+    /// +- <assets...>
     /// ```
     ///
     /// - Important: Pass a `DocumentSaveDialogConfiguration` whose
     ///   `defaultFileType` matches the document subclass *and* whose
-    ///   `defaultFileName` is **folder‐style** (without the extension).
+    ///   `defaultFileName` is **folder-style** (without the extension).
     @MainActor
     public func createFolderDocumentWithDialog(
         configuration: DocumentSaveDialogConfiguration,
@@ -103,21 +103,21 @@ extension NSDocumentController {
         onCompletion: @escaping () -> Void,
         onCancel: @escaping () -> Void
     ) {
-        // 1 ────────────────────────────────────────────────────────────────
+        // 1 ----------------------------------------------------------------
         // Configure the NSSavePanel
         let panel = configureSavePanel(mode: mode, configuration: configuration)
 
         DispatchQueue.main.async { onDialogPresented() }
 
         guard panel.runModal() == .OK,
-              // e.g.  …/ProjectName
+              // e.g.  .../ProjectName
               let baseURL = panel.url else {
             onCancel()
             return
         }
 
         do {
-            // 2 ────────────────────────────────────────────────────────────────
+            // 2 ----------------------------------------------------------------
             // For a *folder* document, create the workspace directory up front.
             if mode == .folder {
                 try FileManager.default.createDirectory(
@@ -127,10 +127,10 @@ extension NSDocumentController {
                 )
             }
 
-            // 3 ────────────────────────────────────────────────────────────────
+            // 3 ----------------------------------------------------------------
             // Derive the final URL of the actual NSDocument header file.
-            //   …/ProjectName/ProjectName.circuitproj    (folder mode)
-            //   …/SomeFile.circuitproj                   (file mode)
+            //   .../ProjectName/ProjectName.circuitproj    (folder mode)
+            //   .../SomeFile.circuitproj                   (file mode)
             let ext = configuration
                 .defaultFileType
                 .preferredFilenameExtension ?? "file"
@@ -141,7 +141,7 @@ extension NSDocumentController {
                 baseURL
             }
 
-            // 4 ────────────────────────────────────────────────────────────────
+            // 4 ----------------------------------------------------------------
             // Create, write and open the document.
 
             let document = try makeUntitledDocument(

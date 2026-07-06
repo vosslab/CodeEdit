@@ -51,7 +51,7 @@ let package = Package(
                     "README.md",
                     "src/grammar.json",
                     "src/node-types.json",
-                    // any additional files to exclude 
+                    // any additional files to exclude
                 ],
                 sources: [
                     "src/parser.c",
@@ -99,7 +99,7 @@ extern TSLanguage *tree_sitter_{lang}();
 
 In order to add a language to ``CodeEditLanguages`` you need to open the `.xcodeproj` file located inside `CodeLanguage-Container`.
 
-![.xcodeproj location](xcodeproj-location)
+`.xcodeproj` location
 
 1. Add the `tree-sitter` package you created earlier as a dependency like you would in a regular Xcode project.
 
@@ -123,7 +123,7 @@ In order to add a language to ``CodeEditLanguages`` you need to open the `.xcode
     > ```
 
 5. Check the output of the script. It should say `Done!` at the end.
-   ![build_framework.sh console output](build-output)
+   `build_framework.sh` console output
    > Tip: If this does not succeed, try running the script using the `--debug` flag to get verbose output:
    > ```bash
    > $ ./build_framework.sh --debug
@@ -165,8 +165,8 @@ On the bottom of the file add a new `static` constant:
 
 ```swift
 static let {lang}: CodeLanguage = .init(
-    id: .{lang}, 
-    tsName: {lang}, 
+    id: .{lang},
+    tsName: {lang},
     extensions: [...]
 )
 ```
@@ -247,9 +247,9 @@ Also make sure to add test cases for your new language in `Tests/CodeEditLanguag
 ### Run Tests locally
 
 Once you added your unit test cases run all tests locally on your machine by going to `Product>Test` or pressing `⌘+U` to make sure everything is working as intended.
-![unit test results](tests-results)
+   `unit test results`
 
 ## Documentation
 
 Please make sure to add the newly created properties to the documentation `*.md` files in the `Documentation.docc` catalog.
-![docs location](docs-location)
+`docs` location

@@ -40,16 +40,16 @@ import CodeEditTextView
 import AppKit
 
 /// # ViewController
-/// 
+///
 /// An example view controller for displaying a text view embedded in a scroll view.
 class ViewController: NSViewController, TextViewDelegate {
     private var scrollView: NSScrollView!
     private var textView: TextView!
-    
+
     var text: String = "func helloWorld() {\n\tprint(\"hello world\")\n}"
     var font: NSFont!
     var textColor: NSColor!
-    
+
     override func loadView() {
 		textView = TextView(
             string: text,

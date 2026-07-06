@@ -287,7 +287,7 @@ final class TextLayoutLineStorageTests: XCTestCase { // swiftlint:disable:this t
         //       /    \
         //     7        2
         //            /
-        //           3     ← this will be moved, this test ensures 4 retains it's left subtree count
+        //           3     <- this will be moved, this test ensures 4 retains it's left subtree count
         //             \
         //              4
         //             | |

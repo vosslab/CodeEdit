@@ -46,7 +46,7 @@ public struct DocumentSaveDialogConfiguration {
     ///   - allowedContentTypes: The allowed content types for the save dialog. Default is `[.plainText]`.
     ///   - defaultFileType: The content type that will be used to create the document. Defaults to `.plainText`.
     ///   - title: The title of the save dialog window. Default is `"Create a New Document"`.
-    ///   - directoryURL: The default directory URL. Default is the user’s Documents folder.
+    ///   - directoryURL: The default directory URL. Default is the user's Documents folder.
     public init(
         prompt: String = "Create Document",
         nameFieldLabel: String = "File Name:",

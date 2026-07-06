@@ -4,7 +4,7 @@ A collection of `tree-sitter` languages for syntax highlighting.
 
 ## Overview
 
-![logo](codeeditlanguages-logo)
+CodeEditLanguages logo
 
 This package includes a binary framework `CodeLanguagesContainer.xcframework` which bundles all `tree-sitter` languages in a single binary to greatly reduce SPM package resolution times.
 

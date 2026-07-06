@@ -10,7 +10,7 @@ import AppKit
 /// # Notes for Marked Text
 ///
 /// Marked text is used when a character may need more than one keystroke to insert text. For example pressing option-e
-/// then e again to insert the é character.
+/// then e again to insert the e character.
 ///
 /// The text view needs to maintain a range of marked text and apply attributes indicating the text is marked. When
 /// selection is updated, the marked text range can be discarded if the cursor leaves the marked text range.
@@ -67,7 +67,7 @@ extension TextView: NSTextInputClient {
     ///
     /// - Parameters:
     ///   - string: The text to insert, either an NSString or NSAttributedString instance.
-    ///   - replacementRange: The range of content to replace in the receiver’s text storage.
+    ///   - replacementRange: The range of content to replace in the receiver's text storage.
     @objc public func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable, let insertString = anyToString(string) else { return }
         unmarkText()
@@ -149,7 +149,7 @@ extension TextView: NSTextInputClient {
     }
 
     /// Returns the range of selected text.
-    /// The returned range measures from the start of the receiver’s text storage, that is, from 0 to the document
+    /// The returned range measures from the start of the receiver's text storage, that is, from 0 to the document
     /// length.
     /// - Returns: The range of selected text or {NSNotFound, 0} if there is no selection.
     @objc public func selectedRange() -> NSRange {
@@ -158,7 +158,7 @@ extension TextView: NSTextInputClient {
 
     /// Returns the range of the marked text.
     ///
-    /// The returned range measures from the start of the receiver’s text storage. The return value’s location is
+    /// The returned range measures from the start of the receiver's text storage. The return value's location is
     /// `NSNotFound` and its length is `0` if and only if `hasMarkedText()` returns false.
     ///
     /// - Returns: The range of marked text or {NSNotFound, 0} if there is no marked range.
@@ -192,9 +192,9 @@ extension TextView: NSTextInputClient {
     ///
     /// An implementation of this method should be prepared for aRange to be out of bounds.
     /// For example, the InkWell text input service can ask for the contents of the text input client
-    /// that extends beyond the document’s range. In this case, you should return the
-    /// intersection of the document’s range and aRange. If the location of aRange is completely outside of the
-    /// document’s range, return nil.
+    /// that extends beyond the document's range. In this case, you should return the
+    /// intersection of the document's range and aRange. If the location of aRange is completely outside of the
+    /// document's range, return nil.
     ///
     /// - Parameters:
     ///   - range: The range in the text storage from which to create the returned string.
@@ -211,7 +211,7 @@ extension TextView: NSTextInputClient {
     }
 
     /// Returns an attributed string representing the receiver's text storage.
-    /// - Returns: The attributed string of the receiver’s text storage.
+    /// - Returns: The attributed string of the receiver's text storage.
     @objc public func attributedString() -> NSAttributedString {
         textStorage.attributedSubstring(from: documentRange)
     }
@@ -224,7 +224,7 @@ extension TextView: NSTextInputClient {
     ///   - actualRange: If non-NULL, contains the character range corresponding to the returned area if it was
     ///                  adjusted, for example, to a grapheme cluster boundary or characters in the first line fragment.
     /// - Returns: The boundary rectangle for the given range of characters, in *screen* coordinates.
-    ///            The rectangle’s size value can be negative if the text flows to the left.
+    ///            The rectangle's size value can be negative if the text flows to the left.
     @objc public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
         if actualRange != nil {
             let realRange = (textStorage.string as NSString).rangeOfComposedCharacterSequences(for: range)
@@ -240,8 +240,8 @@ extension TextView: NSTextInputClient {
 
     /// Returns the index of the character whose bounding rectangle includes the given point.
     /// - Parameter point: The point to test, in *screen* coordinates.
-    /// - Returns: The character index, measured from the start of the receiver’s text storage, of the character
-    ///            containing the given point. Returns NSNotFound if the cursor is not within a character’s
+    /// - Returns: The character index, measured from the start of the receiver's text storage, of the character
+    ///            containing the given point. Returns NSNotFound if the cursor is not within a character's
     ///            bounding rectangle.
     @objc public func characterIndex(for point: NSPoint) -> Int {
         guard let windowPoint = window?.convertPoint(fromScreen: point) else {
@@ -256,12 +256,12 @@ extension TextView: NSTextInputClient {
     ///
     /// For purposes such as dragging out a selection or placing the insertion point, a partial percentage less than or
     /// equal to 0.5 indicates that aPoint should be considered as falling before the glyph; a partial percentage
-    /// greater than 0.5 indicates that it should be considered as falling after the glyph. If the nearest glyph doesn’t
+    /// greater than 0.5 indicates that it should be considered as falling after the glyph. If the nearest glyph doesn't
     /// lie under aPoint at all (for example, if aPoint is beyond the beginning or end of a line), this ratio is 0 or 1.
     ///
-    /// For example, if the glyph stream contains the glyphs “A” and “b”, with the width of “A” being 13 points, and
-    /// aPoint is 8 points from the left side of “A”, then the fraction of the distance is 8/13, or 0.615. In this
-    /// case, the aPoint should be considered as falling between “A” and “b” for purposes such as dragging out a
+    /// For example, if the glyph stream contains the glyphs "A" and "b", with the width of "A" being 13 points, and
+    /// aPoint is 8 points from the left side of "A", then the fraction of the distance is 8/13, or 0.615. In this
+    /// case, the aPoint should be considered as falling between "A" and "b" for purposes such as dragging out a
     /// selection or placing the insertion point.
     ///
     /// - Parameter point: The point to test.

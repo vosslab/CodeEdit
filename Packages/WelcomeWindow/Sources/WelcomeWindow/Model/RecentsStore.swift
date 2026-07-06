@@ -62,12 +62,12 @@ public enum RecentsStore {
     }
 
     // MARK: - Folder / file specific access
-    /// Recent entries that are directories (projects that live in folders, asset catalogs, …)
+    /// Recent entries that are directories (projects that live in folders, asset catalogs, ...)
     public static func recentDirectoryURLs() -> [URL] {
         filterURLs { $0.isDirectory }
     }
 
-    /// Recent entries that are regular files (App documents, text files, …)
+    /// Recent entries that are regular files (App documents, text files, ...)
     public static func recentFileURLs() -> [URL] {
         filterURLs { !$0.isDirectory }
     }
@@ -92,7 +92,7 @@ public enum RecentsStore {
 
             saveBookmarks(Array(bookmarks.prefix(100)))
         } catch {
-            print("❌ Failed to create bookmark for recent project: \(error)")
+            print("[x] Failed to create bookmark for recent project: \(error)")
         }
     }
 
@@ -155,8 +155,8 @@ public enum RecentsStore {
     /// Returns `true` when the url resides in a macOS Trash folder.
     private static func isInTrash(_ url: URL) -> Bool {
         let comps = url.standardized.pathComponents
-        //  ~/.Trash/...              → ".Trash"
-        //  /Volumes/Disk/.Trashes/501/...  → ".Trashes"
+        //  ~/.Trash/...              -> ".Trash"
+        //  /Volumes/Disk/.Trashes/501/...  -> ".Trashes"
         return comps.contains(".Trash") || comps.contains(".Trashes")
     }
 

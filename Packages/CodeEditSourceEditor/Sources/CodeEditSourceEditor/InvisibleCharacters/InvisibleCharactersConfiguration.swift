@@ -25,9 +25,9 @@ public struct InvisibleCharactersConfiguration: Equatable, Hashable, Sendable, C
     public var showLineEndings: Bool
 
     /// Replacement when drawing the space character, enabled by ``showSpaces``.
-    public var spaceReplacement: String = "·"
+    public var spaceReplacement: String = "*"
     /// Replacement when drawing the tab character, enabled by ``showTabs``.
-    public var tabReplacement: String = "→"
+    public var tabReplacement: String = "->"
     /// Replacement when drawing the carriage return character, enabled by ``showLineEndings``.
     public var carriageReturnReplacement: String = "↵"
     /// Replacement when drawing the line feed character, enabled by ``showLineEndings``.

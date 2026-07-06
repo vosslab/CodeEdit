@@ -36,4 +36,4 @@ return toolbarItem
 
 ## Preview
 
-![BranchPicker](BranchPicker_View.png)
+BranchPicker preview

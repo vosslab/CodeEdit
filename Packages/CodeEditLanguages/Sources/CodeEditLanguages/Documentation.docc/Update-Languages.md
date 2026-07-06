@@ -9,7 +9,7 @@ From time to time the `tree-sitter` languages need to be updated to their latest
 ## Update the Dependencies
 
 1. Open the `CodeLanguages-Container.xcodeproj` which is located inside the `./CodeLanguages-Container` directory.
-   ![xcodeproj location](xcodeproj-location)
+   `.xcodeproj` location
 
 2. Go to `File > Packages > Update to Latest Package Versions` and let it resolve the SPM dependencies.
    > Note: Depending on your internet connection and Mac hardware this step can take a couple of minutes.
@@ -40,7 +40,7 @@ From time to time the `tree-sitter` languages need to be updated to their latest
    > Note: This script automatically removes old artifacts and replaces them with the new ones.
 
 3. Check the console output. It should say `Done!` at the end.
-   ![build output](build-output)
+   `build output`
    > Tip: If you don't get the output and the script terminates early, there might be an issue. Try running the script again with the `--debug` flag appended:
    > ```bash
    > $ ./build_framework.sh --debug

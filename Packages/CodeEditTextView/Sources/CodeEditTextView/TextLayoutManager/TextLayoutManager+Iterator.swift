@@ -119,7 +119,7 @@ public extension TextLayoutManager {
         }
     }
 
-    /// Determines the “visible” line position by merging any consecutive lines
+    /// Determines the "visible" line position by merging any consecutive lines
     /// that are spanned by text attachments. If an attachment overlaps beyond the
     /// bounds of the original line, this method will extend the returned range to
     /// cover the full span of those attachments (and recurse if further attachments
@@ -132,21 +132,21 @@ public extension TextLayoutManager {
     /// Line 3
     /// Line] 4
     /// ```
-    /// If you start at the position for “Line 2”, the first and last attachments
-    /// overlap lines 2–4, so this method will extend the range to cover lines 2–4
+    /// If you start at the position for "Line 2", the first and last attachments
+    /// overlap lines 2-4, so this method will extend the range to cover lines 2-4
     /// and return a position whose `range` spans the entire attachment.
     ///
     /// # Why recursion?
     ///
     /// When an attachment extends the visible range, it may pull in new lines that themselves overlap other
-    /// attachments. A simple one‐pass merge wouldn’t catch those secondary overlaps. By calling
-    /// determineVisiblePosition again on the newly extended range, we ensure that all cascading attachments—no matter
-    /// how many lines they span—are folded into a single, coherent TextLinePosition before returning.
+    /// attachments. A simple one-pass merge wouldn't catch those secondary overlaps. By calling
+    /// determineVisiblePosition again on the newly extended range, we ensure that all cascading attachments-no matter
+    /// how many lines they span-are folded into a single, coherent TextLinePosition before returning.
     ///
     /// - Parameter originalPosition: The initial `TextLinePosition` to inspect.
     ///   Pass in the position you got from `lineStorage.getLine(atOffset:)` or similar.
     /// - Returns: A tuple containing `position`: A `TextLinePosition` whose `range` and `index` have been
-    ///            adjusted to include any attachment‐spanned lines.. `indexRange`: A `ClosedRange<Int>` listing all of
+    ///            adjusted to include any attachment-spanned lines.. `indexRange`: A `ClosedRange<Int>` listing all of
     ///            the line indices that are now covered by the returned position.
     ///   Returns `nil` if `originalPosition` is `nil`.
     func determineVisiblePosition(

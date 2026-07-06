@@ -27,7 +27,7 @@ extension TextLayoutManager {
     /// The thing that makes this layout method so fast is the second point, checking if a line needs layout. To
     /// determine if a line needs a layout pass, the layout manager can check three things:
     /// - **1** Was the line laid out under the assumption of a different maximum layout width?
-    ///   For instance, if a line was previously broken by the line wrapping setting, it won’t need to wrap once the
+    ///   For instance, if a line was previously broken by the line wrapping setting, it won't need to wrap once the
     ///   line wrapping is disabled. This will detect that, and cause the lines to be recalculated.
     /// - **2** Was the line previously not visible? This is determined by keeping a set of visible line IDs. If the
     ///   line does not appear in that set, we can assume it was previously off screen and may need layout.
@@ -56,7 +56,7 @@ extension TextLayoutManager {
     /// boolean and assertion.
     ///
     /// To help ensure this property, all view modifications are performed within a `CATransaction`. This guarantees
-    /// that macOS calls `layout` on any related views only after we’ve finished inserting and removing line fragment
+    /// that macOS calls `layout` on any related views only after we've finished inserting and removing line fragment
     /// views. Otherwise, inserting a line fragment view could trigger a layout pass prematurely and cause this method
     /// to re-enter.
     /// - Warning: This is probably not what you're looking for. If you need to invalidate layout, or update lines, this

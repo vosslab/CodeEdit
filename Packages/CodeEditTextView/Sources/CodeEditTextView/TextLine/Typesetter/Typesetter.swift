@@ -171,7 +171,7 @@ final public class Typesetter {
 
         // Layout as many fragments as possible in this content run
         while context.currentPosition < range.max {
-            // The line break indicates the distance from the range we’re typesetting on that should be broken at.
+            // The line break indicates the distance from the range we're typesetting on that should be broken at.
             // It's relative to the range being typeset, not the line
             let lineBreak = typesetter.suggestLineBreak(
                 using: substring,

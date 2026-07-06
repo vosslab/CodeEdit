@@ -265,8 +265,8 @@ extension TextLayoutManager {
 
         guard validRange.length > 0 else { return rectForEndOffset().map { NSBezierPath(rect: $0) } }
 
-        var rightSidePoints: [CGPoint] = [] // Points for Bottom-right → Top-right
-        var leftSidePoints: [CGPoint] = []  // Points for Bottom-left → Top-left
+        var rightSidePoints: [CGPoint] = [] // Points for Bottom-right -> Top-right
+        var leftSidePoints: [CGPoint] = []  // Points for Bottom-left -> Top-left
 
         for fragmentRect in rectsFor(range: range) {
             rightSidePoints.append(

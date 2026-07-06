@@ -184,7 +184,7 @@ private extension TextAttachmentManager {
     ///
     /// - Note: always returns a value in `0...orderedAttachments.count`.
     ///         If it returns `orderedAttachments.count`, no element satisfied
-    ///         the predicate, but that’s still a valid insertion point.
+    ///         the predicate, but that's still a valid insertion point.
     func lowerBoundIndex(
         where predicate: (AnyTextAttachment) -> Bool
     ) -> Int {
@@ -204,7 +204,7 @@ private extension TextAttachmentManager {
     /// Returns the index in `orderedAttachments` at which an attachment whose
     /// `range.location == location` *could* be inserted, keeping the array sorted.
     ///
-    /// - Parameter location: the attachment’s `range.location`
+    /// - Parameter location: the attachment's `range.location`
     /// - Returns: a valid insertion index in `0...orderedAttachments.count`
     func findInsertionIndex(for location: Int) -> Int {
         lowerBoundIndex { $0.range.location >= location }

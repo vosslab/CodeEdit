@@ -12,7 +12,7 @@ extension NSImage {
     func dominantColor(sampleCount: Int = 1000) -> NSColor? {
         var proposedRect = NSRect(origin: .zero, size: self.size)
         guard let cgImage = self.cgImage(forProposedRect: &proposedRect, context: nil, hints: nil) else {
-            print("❌ Failed to create CGImage from NSImage")
+            print("[x] Failed to create CGImage from NSImage")
             return nil
         }
 
@@ -28,13 +28,13 @@ extension NSImage {
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
-            print("❌ Failed to create CGContext")
+            print("[x] Failed to create CGContext")
             return nil
         }
 
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         guard let pixelData = context.data else {
-            print("❌ No pixel data found")
+            print("[x] No pixel data found")
             return nil
         }
 

@@ -57,10 +57,10 @@ You might have a symbol called `lock` and one where the symbol is inside a squar
 
 ### Example of a `.fill` Variant
 
-![Fill Variant](fill_variant.png)
+Fill Variant example
 
 ## Annotate the Symbol
 
 As of version 3 of `SF Symbols` it is possible to create `multi-color`, `hierarchical` and `palette` annotations inside the `SF Symbols.app`. Be sure to annotate it accordingly if appropriate.
 
-![Annotating](annotating.png)
+Annotating example

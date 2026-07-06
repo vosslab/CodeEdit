@@ -47,44 +47,44 @@ In order to add support for additional languages we have a complete guide on how
 
 | Grammar        | Implemented | Syntax Highlighting |
 | -------------- | :---------: | :-----------------: |
-| [Agda](https://github.com/tree-sitter/tree-sitter-agda.git) | ✅ | _not available_ |
-| [Bash](https://github.com/tree-sitter/tree-sitter-bash) | ✅ | ✅ |
-| [C](https://github.com/tree-sitter/tree-sitter-c) | ✅ | ✅ |
-| [C++](https://github.com/tree-sitter/tree-sitter-cpp) | ✅ | ✅ |
-| [C#](https://github.com/tree-sitter/tree-sitter-c-sharp) | ✅ | ✅ |
-| [CSS](https://github.com/tree-sitter/tree-sitter-css.git) | ✅ | ✅ |
-| [Dart](https://github.com/UserNobody14/tree-sitter-dart.git) | ✅ | ✅ |
-| [Dockerfile](https://github.com/camdencheek/tree-sitter-dockerfile) | ✅ | ✅ |
-| [Elixir](https://github.com/elixir-lang/tree-sitter-elixir) | ✅ | ✅ |
+| [Agda](https://github.com/tree-sitter/tree-sitter-agda.git) | [OK] | _not available_ |
+| [Bash](https://github.com/tree-sitter/tree-sitter-bash) | [OK] | [OK] |
+| [C](https://github.com/tree-sitter/tree-sitter-c) | [OK] | [OK] |
+| [C++](https://github.com/tree-sitter/tree-sitter-cpp) | [OK] | [OK] |
+| [C#](https://github.com/tree-sitter/tree-sitter-c-sharp) | [OK] | [OK] |
+| [CSS](https://github.com/tree-sitter/tree-sitter-css.git) | [OK] | [OK] |
+| [Dart](https://github.com/UserNobody14/tree-sitter-dart.git) | [OK] | [OK] |
+| [Dockerfile](https://github.com/camdencheek/tree-sitter-dockerfile) | [OK] | [OK] |
+| [Elixir](https://github.com/elixir-lang/tree-sitter-elixir) | [OK] | [OK] |
 | [ERB, EJS](https://github.com/tree-sitter/tree-sitter-embedded-template) |  |  |
-| [Go](https://github.com/tree-sitter/tree-sitter-go) | ✅ | ✅ |
-| [Haskell](https://github.com/tree-sitter/tree-sitter-haskell) | ✅ | ✅ |
-| [HTML](https://github.com/tree-sitter/tree-sitter-html) | ✅ | ✅ |
-| [Java](https://github.com/tree-sitter/tree-sitter-java) | ✅ | ✅ |
-| [JavaScript/JSX](https://github.com/tree-sitter/tree-sitter-javascript) | ✅ | ✅ |
-| [JSDoc](https://github.com/tree-sitter/tree-sitter-jsdoc) | ✅ | ✅ |
-| [JSON](https://github.com/tree-sitter/tree-sitter-json) | ✅ | ✅ |
-| [Julia](https://github.com/tree-sitter/tree-sitter-julia) | ✅ | _not available_ |
-| [Kotlin](https://github.com/fwcd/tree-sitter-kotlin) | ✅ | ✅ |
-| [Lua](https://github.com/tree-sitter-grammars/tree-sitter-lua) | ✅ | ✅ |
-| [Markdown](https://github.com/tree-sitter-grammars/tree-sitter-markdown) | ✅ | ✅ |
-| [Objective C](https://github.com/tree-sitter-grammars/tree-sitter-objc) | ✅ | ✅ |
-| [OCaml](https://github.com/tree-sitter/tree-sitter-ocaml) | ✅ | ✅ |
-| Plain Text | ✅ | _not available_ |
-| [Perl](https://github.com/ganezdragon/tree-sitter-perl) | ✅ | _not available_ |
-| [PHP](https://github.com/tree-sitter/tree-sitter-php) | ✅ | ✅ |
-| [Python](https://github.com/tree-sitter/tree-sitter-python) | ✅ | ✅ |
-| [Regex](https://github.com/tree-sitter/tree-sitter-regex) | ✅ | ✅ |
-| [Ruby](https://github.com/mattmassicotte/tree-sitter-ruby) | ✅ | ✅ |
-| [Rust](https://github.com/tree-sitter/tree-sitter-rust) | ✅ | ✅ |
-| [Scala](https://github.com/tree-sitter/tree-sitter-scala) | ✅ | ✅ |
-| [Sql](https://github.com/DerekStride/tree-sitter-sql) | ✅ | ✅ |
-| [Swift](https://github.com/alex-pinkus/tree-sitter-swift/tree/with-generated-files) | ✅ | ✅ |
-| [TOML](https://github.com/cengelbart39/tree-sitter-toml/tree/feature/spm) | ✅ | ✅ |
-| [TypeScript/TSX](https://github.com/tree-sitter/tree-sitter-typescript) | ✅ | ✅ |
-| [Verilog](https://github.com/tree-sitter/tree-sitter-verilog) | ✅ | _not available_ |
-| [YAML](https://github.com/tree-sitter-grammars/tree-sitter-yaml.git) | ✅ | ✅ |
-| [Zig](https://github.com/tree-sitter-grammars/tree-sitter-zig.git) | ✅ | ✅ |
+| [Go](https://github.com/tree-sitter/tree-sitter-go) | [OK] | [OK] |
+| [Haskell](https://github.com/tree-sitter/tree-sitter-haskell) | [OK] | [OK] |
+| [HTML](https://github.com/tree-sitter/tree-sitter-html) | [OK] | [OK] |
+| [Java](https://github.com/tree-sitter/tree-sitter-java) | [OK] | [OK] |
+| [JavaScript/JSX](https://github.com/tree-sitter/tree-sitter-javascript) | [OK] | [OK] |
+| [JSDoc](https://github.com/tree-sitter/tree-sitter-jsdoc) | [OK] | [OK] |
+| [JSON](https://github.com/tree-sitter/tree-sitter-json) | [OK] | [OK] |
+| [Julia](https://github.com/tree-sitter/tree-sitter-julia) | [OK] | _not available_ |
+| [Kotlin](https://github.com/fwcd/tree-sitter-kotlin) | [OK] | [OK] |
+| [Lua](https://github.com/tree-sitter-grammars/tree-sitter-lua) | [OK] | [OK] |
+| [Markdown](https://github.com/tree-sitter-grammars/tree-sitter-markdown) | [OK] | [OK] |
+| [Objective C](https://github.com/tree-sitter-grammars/tree-sitter-objc) | [OK] | [OK] |
+| [OCaml](https://github.com/tree-sitter/tree-sitter-ocaml) | [OK] | [OK] |
+| Plain Text | [OK] | _not available_ |
+| [Perl](https://github.com/ganezdragon/tree-sitter-perl) | [OK] | _not available_ |
+| [PHP](https://github.com/tree-sitter/tree-sitter-php) | [OK] | [OK] |
+| [Python](https://github.com/tree-sitter/tree-sitter-python) | [OK] | [OK] |
+| [Regex](https://github.com/tree-sitter/tree-sitter-regex) | [OK] | [OK] |
+| [Ruby](https://github.com/mattmassicotte/tree-sitter-ruby) | [OK] | [OK] |
+| [Rust](https://github.com/tree-sitter/tree-sitter-rust) | [OK] | [OK] |
+| [Scala](https://github.com/tree-sitter/tree-sitter-scala) | [OK] | [OK] |
+| [Sql](https://github.com/DerekStride/tree-sitter-sql) | [OK] | [OK] |
+| [Swift](https://github.com/alex-pinkus/tree-sitter-swift/tree/with-generated-files) | [OK] | [OK] |
+| [TOML](https://github.com/cengelbart39/tree-sitter-toml/tree/feature/spm) | [OK] | [OK] |
+| [TypeScript/TSX](https://github.com/tree-sitter/tree-sitter-typescript) | [OK] | [OK] |
+| [Verilog](https://github.com/tree-sitter/tree-sitter-verilog) | [OK] | _not available_ |
+| [YAML](https://github.com/tree-sitter-grammars/tree-sitter-yaml.git) | [OK] | [OK] |
+| [Zig](https://github.com/tree-sitter-grammars/tree-sitter-zig.git) | [OK] | [OK] |
 
 ## Related Repositories
 
