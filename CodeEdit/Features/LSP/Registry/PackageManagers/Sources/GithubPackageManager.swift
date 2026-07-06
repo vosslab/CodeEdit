@@ -160,13 +160,23 @@ final class GithubPackageManager: PackageManagerProtocol {
             let downloadPath = installationDirectory.appending(path: source.entryName)
             let packagePath = downloadPath.appending(path: fileName)
 
-            if packagePath.pathExtension == "tar" || packagePath.pathExtension == ".zip" {
+            if packagePath.pathExtension == "zip" {
                 await model.status("Decompressing \(fileName)")
                 try await FileManager.default.unzipItem(at: packagePath, to: downloadPath, progress: model.progress)
                 if FileManager.default.fileExists(atPath: packagePath.path(percentEncoded: false)) {
                     try FileManager.default.removeItem(at: packagePath)
                 }
                 await model.status("Decompressed to '\(downloadPath.path(percentEncoded: false))'")
+            } else if packagePath.pathExtension == "tar" {
+                await model.status("Decompressing \(fileName) using `tar`")
+                _ = try await model.executeInDirectory(
+                    in: packagePath.deletingLastPathComponent().path(percentEncoded: false),
+                    [
+                        "tar",
+                        "-xf",
+                        packagePath.path(percentEncoded: false).escapedDirectory(),
+                    ]
+                )
             } else if packagePath.lastPathComponent.hasSuffix(".tar.gz") {
                 await model.status("Decompressing \(fileName) using `tar`")
                 _ = try await model.executeInDirectory(

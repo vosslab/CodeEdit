@@ -7,7 +7,6 @@
 
 import OSLog
 import Foundation
-import ZIPFoundation
 import Combine
 
 @MainActor

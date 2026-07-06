@@ -42,7 +42,7 @@ extension RegistryManager {
 
             // Write the zip data to a temporary file, then unzip
             try registryData.write(to: tempZipURL)
-            try FileManager.default.unzipItem(at: tempZipURL, to: installPath)
+            try await FileManager.default.unzipItem(at: tempZipURL, to: installPath)
             try FileManager.default.removeItem(at: tempZipURL)
 
             try checksumData.write(to: checksumDestination)

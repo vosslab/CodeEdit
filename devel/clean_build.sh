@@ -41,6 +41,11 @@ delete_if_exists **/*.tsbuildinfo
 # JS/TS tool caches.
 delete_if_exists .cache .eslintcache .prettiercache .nyc_output
 
+# Xcode / Swift build outputs and metadata.
+delete_if_exists .build .swiftpm DerivedData
+delete_if_exists **/DerivedData **/*.xcresult
+delete_if_exists **/xcuserdata
+
 # Test outputs (Playwright, coverage).
 delete_if_exists test-results playwright-report blob-report coverage
 

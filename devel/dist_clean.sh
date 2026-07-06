@@ -52,6 +52,13 @@ delete_if_exists node_modules
 # JS/TS tool caches.
 delete_if_exists .cache .eslintcache .prettiercache .nyc_output
 
+# Xcode / Swift build outputs and metadata.
+delete_if_exists .build .swiftpm DerivedData
+delete_if_exists **/DerivedData **/*.xcresult
+delete_if_exists **/xcuserdata
+delete_if_exists **/xcshareddata/swiftpm/Package.resolved
+delete_if_exists Packages/**/.build Packages/**/.swiftpm Packages/**/Package.resolved
+
 # Test outputs (Playwright, coverage).
 delete_if_exists test-results playwright-report blob-report coverage
 
