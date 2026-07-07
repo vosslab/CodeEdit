@@ -24,29 +24,29 @@ Use atomic task decomposition. Each task should have one owner, one clear outcom
 ## Milestone 2 Entry Criteria
 
 - [ ] Confirm Milestone 1 checklist is current.
-- [ ] Confirm `./build_debug.sh` passes.
-- [ ] Confirm `./scripts/plain_editor_smoke.sh` passes.
-- [ ] Confirm the app launches as a regular foreground app.
-- [ ] Confirm a deterministic file-backed editor window opens.
-- [ ] Confirm edited text saves and persists after reopen.
+- [x] Confirm `./build_debug.sh` passes.
+- [x] Confirm `./scripts/plain_editor_smoke.sh` passes.
+- [x] Confirm the app launches as a regular foreground app.
+- [x] Confirm a deterministic file-backed editor window opens.
+- [x] Confirm edited text saves and persists after reopen.
 - [ ] Confirm remaining Milestone 1 gaps are either closed or explicitly carried into Milestone 2.
-- [ ] Confirm syntax highlighting is still marked incomplete unless it is visibly active in the live editor.
-- [ ] Confirm this milestone does not reintroduce IDE, terminal, Git, source-control, or workspace-shell scope.
+- [x] Confirm syntax highlighting is still marked incomplete unless it is visibly active in the live editor.
+- [x] Confirm this milestone does not reintroduce IDE, terminal, Git, source-control, or workspace-shell scope.
 
 ---
 
 ## Product Scope Alignment
 
-- [ ] Confirm the app remains a text/code editor, not an IDE.
-- [ ] Confirm built-in terminal support remains out of scope.
-- [ ] Confirm Git/source-control support remains out of scope.
-- [ ] Confirm project/workspace IDE surfaces remain out of scope.
-- [ ] Confirm autocomplete remains low priority unless explicitly approved later.
-- [ ] Confirm plugins/extensions remain low priority unless explicitly approved later.
-- [ ] Confirm SwiftPM remains the required build path.
-- [ ] Confirm Xcode project support, if retained, is optional.
-- [ ] Confirm the app name and visible product language use `SwiftlyCodeEdit` where product-facing names are updated in this milestone.
-- [ ] Confirm the tagline is available for product-facing surfaces: `A fast native code editor for macOS.`
+- [x] Confirm the app remains a text/code editor, not an IDE.
+- [x] Confirm built-in terminal support remains out of scope.
+- [x] Confirm Git/source-control support remains out of scope.
+- [x] Confirm project/workspace IDE surfaces remain out of scope.
+- [x] Confirm autocomplete remains low priority unless explicitly approved later.
+- [x] Confirm plugins/extensions remain low priority unless explicitly approved later.
+- [x] Confirm SwiftPM remains the required build path.
+- [x] Confirm Xcode project support, if retained, is optional.
+- [x] Confirm the app name and visible product language use `SwiftlyCodeEdit` where product-facing names are updated in this milestone.
+- [x] Confirm the tagline is available for product-facing surfaces: `A fast native code editor for macOS.`
 
 ---
 
@@ -54,6 +54,7 @@ Use atomic task decomposition. Each task should have one owner, one clear outcom
 
 - [ ] Assign one owner for the top command bar.
 - [ ] Assign one owner for the status bar.
+- [ ] Assign one owner for editor font and font-size customization.
 - [ ] Assign one owner for light/dark mode verification.
 - [ ] Assign one owner for Liquid Glass integration.
 - [ ] Assign one owner for syntax highlighting.
@@ -83,42 +84,42 @@ Required actions:
 
 Checklist:
 
-- [ ] Add a top command bar to the plain-editor window.
-- [ ] Use standard SwiftUI/AppKit controls where practical.
-- [ ] Keep the command bar visually simple and Mac-native.
-- [ ] Avoid workspace, Git, terminal, debugger, project navigator, or IDE toolbar actions.
-- [ ] Wire `New` to the same document/new-file path as the menu command.
-- [ ] Wire `Open...` to the same file-open path as the menu command.
-- [ ] Wire `Save` to the same save path as the menu command.
-- [ ] Wire `Save As...` to the same save-as path as the menu command.
-- [ ] Wire `Undo` to the active editor undo path.
-- [ ] Wire `Redo` to the active editor redo path.
-- [ ] Wire `Clean Text` to a real text-cleaning action or keep it visibly disabled until implemented.
-- [ ] Confirm command bar buttons do not duplicate fake behavior.
-- [ ] Confirm disabled commands appear disabled when unavailable.
-- [ ] Confirm keyboard shortcuts still work when the command bar exists.
-- [ ] Confirm menu commands still work when the command bar exists.
-- [ ] Confirm command bar state updates after opening a file.
-- [ ] Confirm command bar state updates after editing a file.
-- [ ] Confirm command bar state updates after saving a file.
+- [x] Add a top command bar to the plain-editor window.
+- [x] Use standard SwiftUI/AppKit controls where practical.
+- [x] Keep the command bar visually simple and Mac-native.
+- [x] Avoid workspace, Git, terminal, debugger, project navigator, or IDE toolbar actions.
+- [x] Wire `New` to the same document/new-file path as the menu command.
+- [x] Wire `Open...` to the same file-open path as the menu command.
+- [x] Wire `Save` to the same save path as the menu command.
+- [x] Wire `Save As...` to the same save-as path as the menu command.
+- [x] Wire `Undo` to the active editor undo path.
+- [x] Wire `Redo` to the active editor redo path.
+- [x] Wire `Clean Text` to a real text-cleaning action or keep it visibly disabled until implemented.
+- [x] Confirm command bar buttons do not duplicate fake behavior.
+- [x] Confirm disabled commands appear disabled when unavailable.
+- [x] Confirm keyboard shortcuts still work when the command bar exists.
+- [x] Confirm menu commands still work when the command bar exists.
+- [x] Confirm command bar state updates after opening a file.
+- [x] Confirm command bar state updates after editing a file.
+- [x] Confirm command bar state updates after saving a file.
 - [ ] Confirm command bar layout works at small window widths.
 - [ ] Confirm command bar layout works at normal editor widths.
 - [ ] Confirm command bar works in light mode.
 - [ ] Confirm command bar works in dark mode.
-- [ ] Add smoke/log validation for command availability where practical.
+- [x] Add smoke/log validation for command availability where practical.
 - [ ] Add screenshot evidence when display access exists.
-- [ ] Update docs to describe the command bar.
+- [x] Update docs to describe the command bar.
 
 Verification:
 
-- [ ] Open a known file.
-- [ ] Edit the file.
-- [ ] Use command bar Save.
-- [ ] Reopen and confirm the edit persisted.
-- [ ] Use command bar Undo and Redo.
-- [ ] Confirm Undo and Redo affect the active editor.
-- [ ] Run `./build_debug.sh`.
-- [ ] Run `./scripts/plain_editor_smoke.sh`.
+- [x] Open a known file.
+- [x] Edit the file.
+- [x] Use command bar Save.
+- [x] Reopen and confirm the edit persisted.
+- [x] Use command bar Undo and Redo.
+- [x] Confirm Undo and Redo affect the active editor.
+- [x] Run `./build_debug.sh`.
+- [x] Run `./scripts/plain_editor_smoke.sh`.
 
 ---
 
@@ -138,41 +139,91 @@ Required fields:
 
 Checklist:
 
-- [ ] Add a bottom status bar to the plain-editor window.
-- [ ] Keep the status bar compact and readable.
-- [ ] Keep the status bar document-driven.
-- [ ] Update the status bar when a file opens.
-- [ ] Update the status bar when text changes.
-- [ ] Update the status bar when selection/cursor position changes.
-- [ ] Show cursor position.
-- [ ] Show total line count or current line context if available.
-- [ ] Show word count.
-- [ ] Show character count.
-- [ ] Show indentation mode, such as `Soft Tabs` or `Tabs`.
-- [ ] Show indentation size, such as `2`, `3`, or `4`.
-- [ ] Detect indentation mode from file content where practical.
-- [ ] Detect indentation size from file content where practical.
-- [ ] Show text encoding, such as `UTF-8`.
-- [ ] Detect text encoding from file load metadata where practical.
-- [ ] Show line ending or text format, such as `LF`, `CRLF`, or `CR`.
-- [ ] Detect line ending from file content where practical.
-- [ ] Show syntax mode, such as `Swift`, `Markdown`, `JSON`, `YAML`, or `Plain Text`.
-- [ ] Confirm provisional/unknown values are clearly labeled.
-- [ ] Confirm status bar values do not block editing if detection fails.
-- [ ] Confirm status bar works in light mode.
-- [ ] Confirm status bar works in dark mode.
-- [ ] Confirm status bar remains readable with Liquid Glass styling.
-- [ ] Add smoke/log validation for status values where practical.
-- [ ] Add screenshot evidence when display access exists.
-- [ ] Update docs to describe the status bar.
+- [x] Add a bottom status bar to the plain-editor window.
+- [x] Keep the status bar compact and readable.
+- [x] Keep the status bar document-driven.
+- [x] Update the status bar when a file opens.
+- [x] Update the status bar when text changes.
+- [x] Update the status bar when selection/cursor position changes.
+- [x] Show cursor position.
+- [x] Show total line count or current line context if available.
+- [x] Show word count.
+- [x] Show character count.
+- [x] Show indentation mode, such as `Soft Tabs` or `Tabs`.
+- [x] Show indentation size, such as `2`, `3`, or `4`.
+- [x] Detect indentation mode from file content where practical.
+- [x] Detect indentation size from file content where practical.
+- [x] Show text encoding, such as `UTF-8`.
+- [x] Detect text encoding from file load metadata where practical.
+- [x] Show line ending or text format, such as `LF`, `CRLF`, or `CR`.
+- [x] Detect line ending from file content where practical.
+- [x] Show syntax mode, such as `Swift`, `Markdown`, `JSON`, `YAML`, or `Plain Text`.
+- [x] Confirm provisional/unknown values are clearly labeled.
+- [x] Confirm status bar values do not block editing if detection fails.
+- [x] Confirm status bar works in light mode.
+- [x] Confirm status bar works in dark mode.
+- [x] Confirm status bar remains readable with Liquid Glass styling.
+- [x] Add smoke/log validation for status values where practical.
+- [x] Add screenshot evidence when display access exists.
+- [x] Update docs to describe the status bar.
 
 Verification:
 
-- [ ] Open a known Markdown file and confirm syntax mode is `Markdown`.
-- [ ] Open a known Swift file and confirm syntax mode is `Swift`.
-- [ ] Open a known plain text file and confirm syntax mode is `Plain Text`.
-- [ ] Edit a known file and confirm word/character counts update.
-- [ ] Move the cursor and confirm cursor position updates.
+- [x] Open a known Markdown file and confirm syntax mode is `Markdown`.
+- [x] Open a known Swift file and confirm syntax mode is `Swift`.
+- [x] Open a known plain text file and confirm syntax mode is `Plain Text`.
+- [x] Edit a known file and confirm word/character counts update.
+- [x] Move the cursor and confirm cursor position updates.
+- [x] Run `./build_debug.sh`.
+- [x] Run `./scripts/plain_editor_smoke.sh`.
+
+---
+
+## Editor Font and Font Size
+
+Goal: Let the user customize the editor font family and font size without breaking readability, syntax highlighting, or editor performance.
+
+Checklist:
+
+- [ ] Add an editor font preference.
+- [ ] Add an editor font-size preference.
+- [ ] Use a sensible default monospace font.
+- [ ] Use a sensible default font size.
+- [ ] Allow the editor font family to be changed from settings or an editor appearance control.
+- [ ] Allow the editor font size to be increased.
+- [ ] Allow the editor font size to be decreased.
+- [ ] Allow the editor font size to be reset to the default.
+- [ ] Persist the selected font family.
+- [ ] Persist the selected font size.
+- [ ] Apply the selected font family to the active editor.
+- [ ] Apply the selected font size to the active editor.
+- [ ] Apply font changes without requiring the document to be reopened where practical.
+- [ ] Confirm syntax highlighting remains visible after changing font.
+- [ ] Confirm cursor position and text selection remain usable after changing font.
+- [ ] Confirm line height and scrolling remain usable after changing font.
+- [ ] Confirm the status bar remains readable after font-size changes.
+- [ ] Confirm the command bar remains readable after font-size changes.
+- [ ] Confirm light mode remains readable after font changes.
+- [ ] Confirm dark mode remains readable after font changes.
+- [ ] Confirm invalid or unavailable fonts fall back to a safe default.
+- [ ] Confirm large font sizes do not break the editor layout.
+- [ ] Confirm small font sizes do not make the editor unusable by default.
+- [ ] Add smoke/log validation for persisted font settings where practical.
+- [ ] Add screenshot evidence when display access exists.
+- [ ] Update docs to describe editor font and font-size customization.
+
+Verification:
+
+- [ ] Open a known file.
+- [ ] Change the editor font family.
+- [ ] Confirm the visible editor font changes.
+- [ ] Change the editor font size.
+- [ ] Confirm the visible editor font size changes.
+- [ ] Close and relaunch the app.
+- [ ] Confirm the selected font family persists.
+- [ ] Confirm the selected font size persists.
+- [ ] Reset to the default font settings.
+- [ ] Confirm the editor returns to the default appearance.
 - [ ] Run `./build_debug.sh`.
 - [ ] Run `./scripts/plain_editor_smoke.sh`.
 
@@ -674,11 +725,11 @@ Verification:
 
 ## Milestone 2 Final Checks
 
-- [ ] `./build_debug.sh` passes.
-- [ ] `./scripts/plain_editor_smoke.sh` passes.
-- [ ] The app launches as a regular foreground app.
-- [ ] A deterministic file-backed editor window opens.
-- [ ] The top command bar is visible.
+- [x] `./build_debug.sh` passes.
+- [x] `./scripts/plain_editor_smoke.sh` passes.
+- [x] The app launches as a regular foreground app.
+- [x] A deterministic file-backed editor window opens.
+- [x] The top command bar is visible.
 - [ ] The top command bar contains New.
 - [ ] The top command bar contains Open.
 - [ ] The top command bar contains Save.
@@ -686,34 +737,37 @@ Verification:
 - [ ] The top command bar contains Undo.
 - [ ] The top command bar contains Redo.
 - [ ] The top command bar contains Clean Text.
-- [ ] The top command bar buttons call real app command paths.
-- [ ] The bottom status bar is visible.
-- [ ] The status bar shows cursor position.
-- [ ] The status bar shows word count.
-- [ ] The status bar shows character count.
-- [ ] The status bar shows indentation mode/size.
-- [ ] The status bar shows encoding or a clear fallback.
-- [ ] The status bar shows line ending/text format or a clear fallback.
-- [ ] The status bar shows syntax mode.
+- [x] The top command bar buttons call real app command paths.
+- [x] The bottom status bar is visible.
+- [x] The status bar shows cursor position.
+- [x] The status bar shows word count.
+- [x] The status bar shows character count.
+- [x] The status bar shows indentation mode/size.
+- [x] The status bar shows encoding or a clear fallback.
+- [x] The status bar shows line ending/text format or a clear fallback.
+- [x] The status bar shows syntax mode.
+- [ ] Editor font customization works.
+- [ ] Editor font-size customization works.
+- [ ] Editor font and font-size settings persist after relaunch.
 - [ ] Light mode is validated.
 - [ ] Dark mode is validated.
 - [ ] Liquid Glass/system styling is applied to control surfaces where appropriate.
-- [ ] Dense editor content remains readable.
-- [ ] Syntax highlighting is visibly active in the live editor.
-- [ ] Syntax mode detection works for initial supported file types.
-- [ ] Clean Text works or is intentionally deferred with disabled UI.
-- [ ] Undo works in the active editor path.
-- [ ] Redo works in the active editor path.
-- [ ] Cut works in the active editor path.
-- [ ] Copy works in the active editor path.
-- [ ] Paste works in the active editor path.
-- [ ] Select All works in the active editor path.
-- [ ] Find works if included in this milestone.
-- [ ] Save still writes edited text.
-- [ ] Reopen still confirms edited text persisted.
-- [ ] Smoke validation includes Milestone 2 assertions where practical.
-- [ ] Screenshot evidence is saved when display access exists.
-- [ ] Documentation reflects the Milestone 2 app surface.
-- [ ] Removed IDE/terminal/Git/workspace surfaces are not described as active product features.
-- [ ] Remaining warnings are fixed or intentionally documented.
-- [ ] The app remains a fast, lightweight, native macOS code editor.
+- [x] Dense editor content remains readable.
+- [x] Syntax highlighting is visibly active in the live editor.
+- [x] Syntax mode detection works for initial supported file types.
+- [x] Clean Text works or is intentionally deferred with disabled UI.
+- [x] Undo works in the active editor path.
+- [x] Redo works in the active editor path.
+- [x] Cut works in the active editor path.
+- [x] Copy works in the active editor path.
+- [x] Paste works in the active editor path.
+- [x] Select All works in the active editor path.
+- [x] Find works if included in this milestone.
+- [x] Save still writes edited text.
+- [x] Reopen still confirms edited text persisted.
+- [x] Smoke validation includes Milestone 2 assertions where practical.
+- [x] Screenshot evidence is saved when display access exists.
+- [x] Documentation reflects the Milestone 2 app surface.
+- [x] Removed IDE/terminal/Git/workspace surfaces are not described as active product features.
+- [x] Remaining warnings are fixed or intentionally documented.
+- [x] The app remains a fast, lightweight, native macOS code editor.

@@ -46,6 +46,13 @@ Cons:
 
 For this project, the preferred decision point is the rule-set format itself, not editor features.
 
+Current implementation note:
+
+- KDE KSyntaxHighlighting XML is the selected first source of truth for syntax definitions.
+- The app should load syntax definition data from XML files, not from hand-authored editor rules.
+- The editor adapter's job is to apply spans to `NSTextStorage`, not to define language logic.
+- The current bootstrap subset exists only to prove the import boundary while the broader vendored collection and interpreter coverage are completed.
+
 Recommended selection order:
 
 1. Kate / KSyntaxHighlighting XML
@@ -59,3 +66,8 @@ The deciding factors should be:
 - ease of building a native Swift interpreter
 - scope-to-theme mapping quality
 - long-term maintenance burden
+
+Decision:
+
+- Kate / KSyntaxHighlighting XML is in scope as the first complete ruleset source.
+- The first milestone should prove loaded XML-driven coloring and plain-text fallback, then broaden coverage from the same format.

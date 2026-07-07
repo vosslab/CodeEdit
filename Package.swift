@@ -118,11 +118,15 @@ let package = Package(
             name: "CodeEditTests",
             dependencies: [
                 "CodeEdit",
+                .product(name: "CodeEditSyntaxDefinitions", package: "CodeEditSyntaxDefinitions"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
-            path: "CodeEditTests",
+            path: "CodeEditTests/PackageSmoke",
             sources: [
-                "PackageSmoke/CodeFileDocumentLifecycleTests.swift"
+                "CodeFileDocumentLifecycleTests.swift",
+                "PlainTextCleanerTests.swift",
+                "PlainSyntaxHighlighterTests.swift",
+                "UndoManagerRegistrationTests.swift"
             ]
         ),
     ]

@@ -22,6 +22,7 @@ CodeEdit is a native macOS code editor for Apple Silicon Macs running Tahoe or n
 ## Screenshots
 
 <!-- screenshots:begin (managed by screenshot-docs) -->
+![Plain editor window with top command bar and bottom status bar](docs/screenshots/codeedit_window.png)
 <!-- screenshots:end -->
 
 ## Notes

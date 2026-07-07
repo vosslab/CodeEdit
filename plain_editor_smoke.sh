@@ -1,0 +1,1 @@
+scripts/plain_editor_smoke.sh

@@ -3,7 +3,12 @@
 ### Fixes and Maintenance
 
 - Explicitly show and order the default document window when the plain-editor file document creates it, restoring visible launch for the smoke path.
-- Extended `scripts/plain_editor_smoke.sh` with an optional `~/nsh/easy-screenshot/run.sh --application CodeEdit --preview` confirmation so smoke validation proves a window is actually visible.
+- Extended `scripts/plain_editor_smoke.sh` to capture a live `CodeEdit` screenshot with `~/nsh/easy-screenshot/run.sh` so smoke validation leaves a durable UI artifact.
+- Added line count to the bottom status bar so the document-driven summary is more complete.
+- Documented the remaining SwiftPM resource warning as intentional test-tree noise outside the required app target.
+- Narrowed the package smoke test target to the dedicated `CodeEditTests/PackageSmoke` directory so SwiftPM no longer treats the rest of the test corpus as unhandled files.
+- Added a focused editor behavior test covering `TextView.replaceCharacters`, undo, and redo so typing updates the document model at the bridge boundary.
+- Ported `kateCleanText.js` into a Swift `PlainTextCleaner` utility, wired `Clean Text` to the active editor responder path, and added a package-smoke regression test for the cleaner output.
 - Split the plain-editor work into foundation and product-UI milestones so the remaining behavior gaps stay explicit.
 - Added a shared plain-editor action router scaffold and routed the plain-editor commands through the same document action methods used by the app shell.
 - Added a `New` command to the plain-editor command group and kept `Clean Text` disabled as a placeholder until the real text-cleaning action exists.
@@ -11,6 +16,7 @@
 - Added provisional status values for cursor position, word count, character count, indentation, encoding, line ending, and syntax mode.
 - Added runtime log evidence for the plain-editor command ribbon and status bar so smoke validation can assert the visible shell exists.
 - Extended `scripts/plain_editor_smoke.sh` to check the new ribbon and status-bar runtime markers.
+- Changed `CodeEditSyntaxDefinitions` to lazy-load KDE XML syntax definitions on demand instead of eagerly parsing the whole corpus at repository initialization, reducing launch work on the plain-editor path.
 
 ## 2026-07-06
 
@@ -63,3 +69,9 @@
 - Added `docs/CODE_ARCHITECTURE.md` and `docs/FILE_STRUCTURE.md` to explain the plain-editor cutover and repo layout.
 - Removed `SwiftTerm` from the executable dependency graph because the milestone scope excludes a built-in terminal.
 - Continued cutting the executable target away from the legacy workspace shell so the app can boot through the plain editor path.
+- Switched the plain editor syntax path to load vendored KDE KSyntaxHighlighting XML definitions through `CodeEditSyntaxDefinitions` instead of an ad hoc rule table.
+- Added third-party notices and upstream notes for the pinned KSyntaxHighlighting subset.
+- Cleaned the repository-wide ASCII compliance failures flagged by `pytest tests/`.
+- Switched the syntax-definition loader to discover bundled XML resources generically so the vendored KDE collection can scale beyond the bootstrap subset without code changes.
+- Vendored the full KDE KSyntaxHighlighting `data/syntax/*.xml` snapshot and pinned the import to upstream commit `12091c2350d9bd131246bb0fd98fae1c5bde560f`.
+- 2026-07-07: Imported the full KDE KSyntaxHighlighting XML corpus as the first syntax-definition source of truth, expanded the regex interpreter to honor common XML rule constraints like `column`, `firstNonSpace`, and `minimal`, and added package smoke coverage for loaded-rule highlighting.

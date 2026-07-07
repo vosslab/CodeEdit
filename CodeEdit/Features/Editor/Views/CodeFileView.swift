@@ -49,6 +49,9 @@ struct CodeFileView: View {
                     edgeInsets: .init(left: 12, right: 12),
                     textInsets: .init(left: 0, right: 0),
                     onTextChange: {
+                        if let storage = codeFile.content {
+                            PlainSyntaxHighlighter.highlight(storage: storage, language: codeFile.getLanguage())
+                        }
                         chrome.refresh(document: codeFile, selection: activeTextView?.selectedRange())
                         codeFile.updateChangeCount(.changeDone)
                     },
@@ -57,6 +60,9 @@ struct CodeFileView: View {
                     },
                     onTextViewReady: { textView in
                         activeTextView = textView
+                        if let storage = codeFile.content {
+                            PlainSyntaxHighlighter.highlight(storage: storage, language: codeFile.getLanguage())
+                        }
                         chrome.refresh(document: codeFile, selection: textView.selectedRange())
                     }
                 )
@@ -78,6 +84,9 @@ struct CodeFileView: View {
             PlainEditorStatusBar(chrome: chrome)
         }
         .onAppear {
+            if let storage = codeFile.content {
+                PlainSyntaxHighlighter.highlight(storage: storage, language: codeFile.getLanguage())
+            }
             chrome.refresh(document: codeFile, selection: activeTextView?.selectedRange())
             #if DEBUG
             debugRuntimeLog("CodeFileView appeared length=\(codeFile.content?.length ?? 0) editable=\(isEditable)")
@@ -91,6 +100,7 @@ struct CodeFileView: View {
 @MainActor
 final class PlainEditorChromeModel: ObservableObject {
     @Published var cursorPosition = "--"
+    @Published var lineCount = "--"
     @Published var wordCount = "--"
     @Published var characterCount = "--"
     @Published var indentation = "--"
@@ -104,6 +114,7 @@ final class PlainEditorChromeModel: ObservableObject {
         let selectedRange = selection ?? NSRange(location: 0, length: 0)
 
         cursorPosition = Self.cursorLabel(text: text, selection: selectedRange)
+        lineCount = "\(max(1, text.components(separatedBy: .newlines).count)) lines"
         wordCount = "\(Self.wordCount(in: text)) words"
         characterCount = "\(nsText.length) characters"
         indentation = Self.indentationLabel(in: text)
@@ -112,7 +123,7 @@ final class PlainEditorChromeModel: ObservableObject {
         syntaxMode = Self.languageLabel(document.getLanguage())
         #if DEBUG
         debugRuntimeLog(
-            "Plain editor status: cursor=\(cursorPosition) words=\(wordCount) chars=\(characterCount) indent=\(indentation) encoding=\(encoding) lineEnding=\(lineEnding) syntax=\(syntaxMode)"
+            "Plain editor status: cursor=\(cursorPosition) lines=\(lineCount) words=\(wordCount) chars=\(characterCount) indent=\(indentation) encoding=\(encoding) lineEnding=\(lineEnding) syntax=\(syntaxMode)"
         )
         #endif
     }
@@ -250,6 +261,7 @@ private struct PlainEditorStatusBar: View {
     var body: some View {
         HStack(spacing: 14) {
             Text(chrome.cursorPosition)
+            Text(chrome.lineCount)
             Text(chrome.wordCount)
             Text(chrome.characterCount)
             Text(chrome.indentation)

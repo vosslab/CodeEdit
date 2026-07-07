@@ -8,15 +8,15 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
 
 ## Major components
 
-- [`CodeEdit/CodeEditApp.swift`](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
-- [`CodeEdit/WorkspaceView.swift`](../CodeEdit/WorkspaceView.swift): main workspace shell for the plain editor path.
-- [`CodeEdit/Features/Editor/Views/CodeFileView.swift`](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
-- [`CodeEdit/Features/Editor/Views/PlainTextEditorView.swift`](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
-- [`CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift`](../CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift): document model for open, edit, autosave, and external-change handling.
-- [`Packages/CodeEditTextView/`](../Packages/CodeEditTextView/): local text-view package that provides the editable text surface.
-- [`Packages/CodeEditLanguages/`](../Packages/CodeEditLanguages/): language metadata used for syntax selection.
-- [`Packages/CodeEditSyntaxDefinitions/`](../Packages/CodeEditSyntaxDefinitions/): syntax definition data files.
-- [`DefaultThemes/`](../DefaultThemes/): theme data files.
+- [CodeEditApp.swift](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
+- [WorkspaceView.swift](../CodeEdit/WorkspaceView.swift): main workspace shell for the plain editor path.
+- [CodeFileView.swift](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
+- [PlainTextEditorView.swift](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
+- [CodeFileDocument.swift](../CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift): document model for open, edit, autosave, and external-change handling.
+- `CodeEditTextView`: local text-view package that provides the editable text surface.
+- `CodeEditLanguages`: language metadata used for syntax selection.
+- `CodeEditSyntaxDefinitions`: syntax definition data files.
+- `DefaultThemes`: theme data files.
 
 ## Required build path
 

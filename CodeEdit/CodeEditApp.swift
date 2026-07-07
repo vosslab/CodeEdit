@@ -246,8 +246,21 @@ private struct PlainEditorCommands: Commands {
         }
 
         CommandGroup(after: .saveItem) {
-            Button("Clean Text") { }
-                .disabled(true)
+            Button("Clean Text") {
+                NSApp.sendAction(#selector(TextView.cleanText(_:)), to: nil, from: nil)
+            }
         }
+    }
+}
+
+extension TextView {
+    @objc func cleanText(_ sender: Any?) {
+        guard isEditable else { return }
+        let cleaned = PlainTextCleaner.clean(string)
+        guard cleaned != string else { return }
+        replaceCharacters(
+            in: NSRange(location: 0, length: string.utf16.count),
+            with: cleaned
+        )
     }
 }

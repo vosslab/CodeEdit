@@ -275,10 +275,10 @@ extension SettingsData {
             var tabReplacement: String = "->"
 
             // Controlled by `showLineEndings`
-            var carriageReturnReplacement: String = "↵"
-            var lineFeedReplacement: String = "¬"
-            var paragraphSeparatorReplacement: String = "¶"
-            var lineSeparatorReplacement: String = "⏎"
+            var carriageReturnReplacement: String = "CR"
+            var lineFeedReplacement: String = "LF"
+            var paragraphSeparatorReplacement: String = "PS"
+            var lineSeparatorReplacement: String = "LS"
         }
 
         struct WarningCharacters: Equatable, Hashable, Codable {

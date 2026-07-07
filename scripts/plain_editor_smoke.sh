@@ -52,9 +52,10 @@ wait_for_line "Plain editor status: cursor="
 wait_for_line "Main menu items:"
 
 if [ -x "$HOME/nsh/easy-screenshot/run.sh" ]; then
-  "$HOME/nsh/easy-screenshot/run.sh" --application CodeEdit --preview >>"$RUNTIME_LOG" 2>&1
-  echo "Screenshot confirmation captured" >>"$RUNTIME_LOG"
-  wait_for_line "Screenshot confirmation captured"
+  SCREENSHOT_FILE="$REPO_ROOT/docs/screenshots/codeedit_window.png"
+  "$HOME/nsh/easy-screenshot/run.sh" -A CodeEdit -t CodeEditApp.swift -f "$SCREENSHOT_FILE" >>"$RUNTIME_LOG" 2>&1
+  echo "Screenshot captured: $SCREENSHOT_FILE" >>"$RUNTIME_LOG"
+  wait_for_line "Screenshot captured: $SCREENSHOT_FILE"
 fi
 
 kill "$APP_PID" 2>/dev/null || true

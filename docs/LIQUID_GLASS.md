@@ -4,7 +4,7 @@ Liquid Glass should be treated as the default macOS 26 visual language, not as a
 
 ## 1. Use system components first
 
-Apple’s Liquid Glass guidance says standard SwiftUI, UIKit, and AppKit components such as controls and navigation elements adopt the new appearance and behavior automatically.[^liquid-glass] Apple’s adoption guidance also says apps using standard framework components pick up the latest look and feel when built with the latest SDKs and run on the latest platforms.[^adopting-liquid-glass]
+Apple's Liquid Glass guidance says standard SwiftUI, UIKit, and AppKit components such as controls and navigation elements adopt the new appearance and behavior automatically.[^liquid-glass] Apple's adoption guidance also says apps using standard framework components pick up the latest look and feel when built with the latest SDKs and run on the latest platforms.[^adopting-liquid-glass]
 
 Prefer standard system UI for:
 
@@ -154,7 +154,7 @@ A modern macOS app should still respect:
 - Reduced transparency
 - Reduced motion
 
-Apple’s macOS design guidance emphasizes the Mac as a powerful, spacious, flexible platform where people often use several apps at once.[^designing-for-macos]
+Apple's macOS design guidance emphasizes the Mac as a powerful, spacious, flexible platform where people often use several apps at once.[^designing-for-macos]
 
 Good rule:
 
@@ -230,8 +230,8 @@ Use this as the short version:
 
 ## References
 
-[^liquid-glass]: Apple Developer Documentation, “Liquid Glass.” https://developer.apple.com/documentation/technologyoverviews/liquid-glass
-[^adopting-liquid-glass]: Apple Developer Documentation, “Adopting Liquid Glass.” https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass
-[^meet-liquid-glass]: Apple Developer, WWDC25, “Meet Liquid Glass.” https://developer.apple.com/videos/play/wwdc2025/219/
-[^custom-liquid-glass]: Apple Developer, WWDC25, “Explore custom Liquid Glass with SwiftUI.” https://developer.apple.com/videos/play/wwdc2025/284/
-[^designing-for-macos]: Apple Developer Documentation, “Designing for macOS.” https://developer.apple.com/design/human-interface-guidelines/designing-for-macos
+[^liquid-glass]: Apple Developer Documentation, "Liquid Glass." https://developer.apple.com/documentation/technologyoverviews/liquid-glass
+[^adopting-liquid-glass]: Apple Developer Documentation, "Adopting Liquid Glass." https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass
+[^meet-liquid-glass]: Apple Developer, WWDC25, "Meet Liquid Glass." https://developer.apple.com/videos/play/wwdc2025/219/
+[^custom-liquid-glass]: Apple Developer, WWDC25, "Explore custom Liquid Glass with SwiftUI." https://developer.apple.com/videos/play/wwdc2025/284/
+[^designing-for-macos]: Apple Developer Documentation, "Designing for macOS." https://developer.apple.com/design/human-interface-guidelines/designing-for-macos

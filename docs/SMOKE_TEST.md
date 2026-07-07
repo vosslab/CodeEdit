@@ -25,4 +25,7 @@ Open `CodeEdit/CodeEditApp.swift` on debug launch. The window title should show 
 - Typing updates the document.
 - Save writes the edited text to disk.
 - Open, Save, Close, Undo, Redo, Cut, Copy, Paste, Select All, and Find are present in the app menus.
-
+- The plain-editor window shows a top command bar with New, Open, Save, Save As, Undo, Redo, and Clean Text.
+- The plain-editor window shows a bottom status bar with cursor position, word count, character count, indentation, encoding, line ending, and syntax mode.
+- Syntax highlighting is driven by the bundled KDE XML syntax definitions.
+- The smoke script captures `docs/screenshots/codeedit_window.png` when `easy-screenshot` is available.

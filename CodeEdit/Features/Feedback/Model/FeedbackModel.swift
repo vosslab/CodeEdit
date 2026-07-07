@@ -71,15 +71,15 @@ public class FeedbackModel: ObservableObject {
     private func getFeedbackTypeTitle() -> String {
         switch feedbackTypeListSelection {
         case "behaviour":
-            return "🐞"
+            return "bug"
         case "crash":
-            return "🐞"
+            return "bug"
         case "unresponsive":
-            return "🐞"
+            return "bug"
         case "suggestions":
-            return "✨"
+            return "idea"
         case "other":
-            return "📬"
+            return "mail"
         default:
             return "Other"
         }

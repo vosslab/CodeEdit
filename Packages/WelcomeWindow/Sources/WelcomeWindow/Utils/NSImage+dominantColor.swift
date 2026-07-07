@@ -65,7 +65,7 @@ extension NSImage {
         }
 
         guard let (rgb, _) = colorCount.max(by: { $0.value < $1.value }) else {
-            print("⚠️ No dominant color found. Try increasing sample count or checking image content.")
+            print("Warning: No dominant color found. Try increasing sample count or checking image content.")
             return nil
         }
 

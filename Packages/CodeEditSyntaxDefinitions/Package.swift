@@ -13,11 +13,18 @@ let package = Package(
             targets: ["CodeEditSyntaxDefinitions"]
         )
     ],
+    dependencies: [
+        .package(path: "../CodeEditHighlighting")
+    ],
     targets: [
         .target(
             name: "CodeEditSyntaxDefinitions",
+            dependencies: [
+                .product(name: "CodeEditHighlighting", package: "CodeEditHighlighting")
+            ],
             path: "Sources/CodeEditSyntaxDefinitions",
             resources: [
+                .process("Resources/Vendor/Kate"),
                 .process("Resources/Kate"),
                 .process("Resources/TextMate"),
                 .process("Resources/Sublime"),

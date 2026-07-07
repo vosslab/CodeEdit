@@ -27,7 +27,7 @@ final class TXTDocument: NSDocument, ObservableObject {
     }
 
     override func makeWindowControllers() {
-        let root = TXTEditorView(document: self)          // 👈  SwiftUI wrapper
+        let root = TXTEditorView(document: self)          // SwiftUI wrapper
         let window = NSWindow(contentViewController: NSHostingController(rootView: root))
         addWindowController(NSWindowController(window: window))
     }
