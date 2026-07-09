@@ -22,6 +22,14 @@ This repository is driven by a small set of scripts. Use these first.
 - Captures the app launch log in `/tmp/codeedit_plain_editor_smoke.log`
 - Saves a screenshot artifact to `docs/screenshots/codeedit_window.png` when `~/nsh/easy-screenshot/run.sh` is available
 
+## Benchmark syntax highlighting
+
+- `./scripts/highlight_benchmark.sh`
+- Runs the Kate interpreter cold-pass Swift test and prints per-stage
+  `HIGHLIGHT_BENCH_STAGES` timings (`parseMs`/`interpretMs`/`spanMapMs`) alongside the
+  overall `HIGHLIGHT_BENCH` totals line
+- Writes the parsed timings to `test-results/perf/highlight_cold_pass.txt`
+
 ## Inspect
 
 - `./show_app_jobs.sh`

@@ -34,3 +34,5 @@ component boundaries.
 - Validation and manual testing use sandboxed fixture files, never real source files. Autosave
   writes to disk within about 2 seconds, so exercising the live app against a real file risks
   silent data loss.
+- Remove legacy and dead code promptly. Unreferenced code promotes regressions and drift, so
+  delete it once it is confirmed dead rather than leaving it in the tree.

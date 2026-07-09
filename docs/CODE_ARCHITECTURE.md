@@ -20,7 +20,6 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
 ## Major components
 
 - [CodeEditApp.swift](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
-- `CodeEdit/Features/SmokeTesting/PlainEditorSmokeIntents.swift`: narrow App Intents smoke hooks for deterministic open/edit/save/reopen validation.
 - [CodeFileView.swift](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
 - [PlainTextEditorView.swift](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
 - `CodeEdit/Features/Editor/PlainEditorTextCleaner.swift`: deterministic text-cleaning helpers used by the Clean Text command.
@@ -29,8 +28,43 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
 - `CodeEditHighlighting`: shared highlighting model and Kate XML interpreter.
 - `CodeEditTextView`: local text-view package that provides the editable text surface.
 - `CodeEditLanguages`: language metadata used for syntax selection.
-- `CodeEditSyntaxDefinitions`: syntax definition data files.
+- `CodeEditSyntaxDefinitions`: syntax definition data files and the display-free syntax-highlight
+  pipeline (see below).
 - `DefaultThemes`: theme data files.
+
+`Packages/CodeEditSourceEditor` is not a build dependency in
+[Package.swift](../Package.swift); it is retained on disk as the harvest source for WP-F1
+(porting editor-surface behavior into the plain-editor path), not as live app code.
+
+## Syntax-highlight pipeline
+
+`CodeEditSyntaxDefinitions` exposes the highlight pipeline as separately callable, display-free
+stages ("ammeter" seams: each stage can be timed in isolation, like a meter clamped onto a
+circuit). `CodeEditSyntaxDefinitions.highlightSpans(text:language:)` composes all three for the
+common case; each stage is also public on its own:
+
+- Parse: Kate XML text -> `SyntaxDefinition` (`parseDefinition(kateXML:)` for an uncached, single
+  parse; `definition(forLanguage:)` for the cached lookup used in production, via
+  `SyntaxDefinitionRepository`).
+- Interpret: text + `SyntaxDefinition` -> `[TokenRun]` (`tokenRuns(text:definition:)`), walking the
+  Kate context/rule state machine and emitting UTF-16 `location`/`length` offsets directly (no
+  `String.Index` work in this stage).
+- Span-map: `[TokenRun]` -> `[HighlightSpan]` (`spans(from:in:)`), resolving each token run's
+  UTF-16 range to a `String.Index` range once and carrying the UTF-16 `nsRange` forward on the
+  span so later consumers never reconvert.
+
+Attribute application (`[HighlightSpan]` -> `NSTextStorage` attributes) is the one display-side
+stage, and it lives in the app's `PlainSyntaxHighlighter`, outside this package.
+
+Two process-wide caches keep repeated passes cheap: a `FirstCharFilter` prefilter skips a rule's
+regex whenever the current UTF-16 code unit is provably not a character the rule's pattern can
+start with, and `CompiledRegexCache` shares compiled `NSRegularExpression` instances across every
+open document and pass instead of recompiling per interpreter run.
+
+Each stage is independently timeable via the headless benchmark
+(`scripts/highlight_benchmark.sh`), which prints per-stage `HIGHLIGHT_BENCH_STAGES` timings
+(`parseMs`/`interpretMs`/`spanMapMs`) alongside the overall `HIGHLIGHT_BENCH` totals line and
+writes both to the `test-results/perf/highlight_cold_pass.txt` artifact.
 
 ## Required build path
 

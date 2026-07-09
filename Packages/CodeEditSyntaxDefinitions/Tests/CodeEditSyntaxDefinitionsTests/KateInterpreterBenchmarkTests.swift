@@ -124,6 +124,9 @@ struct KateInterpreterBenchmarkTests {
         guard size > 0 else { return "unknown" }
         var buffer = [CChar](repeating: 0, count: size)
         sysctlbyname("hw.model", &buffer, &size, nil, 0)
-        return String(cString: buffer)
+        // Truncate at the null terminator before decoding, matching String(cString:) semantics.
+        let nullTerminatorIndex = buffer.firstIndex(of: 0) ?? buffer.count
+        let bytes = buffer[..<nullTerminatorIndex].map { UInt8(bitPattern: $0) }
+        return String(decoding: bytes, as: UTF8.self)
     }
 }

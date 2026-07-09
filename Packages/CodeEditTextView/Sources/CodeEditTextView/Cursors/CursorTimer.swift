@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 
+@MainActor
 class CursorTimer {
     /// # Properties
 
@@ -34,10 +35,13 @@ class CursorTimer {
         notifyCursors(shouldHide: shouldHide)
 
         timer = Timer.scheduledTimer(withTimeInterval: newBlinkDuration, repeats: true) { [weak self] _ in
-            self?.assertMain()
-            self?.shouldHide.toggle()
-            guard let shouldHide = self?.shouldHide else { return }
-            self?.notifyCursors(shouldHide: shouldHide)
+            // Timer is always scheduled from this main-actor-isolated type, so it always fires on main.
+            MainActor.assumeIsolated {
+                self?.assertMain()
+                self?.shouldHide.toggle()
+                guard let shouldHide = self?.shouldHide else { return }
+                self?.notifyCursors(shouldHide: shouldHide)
+            }
         }
     }
 
@@ -63,7 +67,7 @@ class CursorTimer {
         cursors.add(newCursor)
     }
 
-    deinit {
+    isolated deinit {
         timer?.invalidate()
         timer = nil
         cursors.removeAllObjects()

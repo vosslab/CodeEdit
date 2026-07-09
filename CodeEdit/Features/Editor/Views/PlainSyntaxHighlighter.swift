@@ -261,10 +261,7 @@ private struct PlainSyntaxTheme {
     let styleColors: [String: NSColor]
 
     static var current: PlainSyntaxTheme {
-        if ProcessInfo.processInfo.environment["SYNTAX_THEME_VARIANT"] == "rotated" {
-            return rotated
-        }
-        return standard
+        standard
     }
 
     static let standard = PlainSyntaxTheme(
@@ -288,30 +285,6 @@ private struct PlainSyntaxTheme {
             "function": .systemOrange,
             "annotation": .systemPurple,
             "string interpolation": .systemOrange
-        ]
-    )
-
-    static let rotated = PlainSyntaxTheme(
-        name: "rotated",
-        baseTextColor: .textColor,
-        tokenColors: [
-            .comment: .systemOrange,
-            .keyword: .systemPink,
-            .string: .systemBlue,
-            .number: .systemGreen,
-            .function: .systemPurple,
-            .type: .systemBrown,
-            .operatorToken: .systemMint,
-            .markup: .systemRed,
-            .plainText: .textColor
-        ],
-        styleColors: [
-            "imports": .systemBrown,
-            "variable": .textColor,
-            "data type": .systemBrown,
-            "function": .systemPurple,
-            "annotation": .systemGreen,
-            "string interpolation": .systemPink
         ]
     )
 

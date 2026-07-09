@@ -1,17 +1,19 @@
 # SwiftlyCodeEdit
 
-A fast native code editor for macOS. It is a lightweight Swift/SwiftUI-first text and code editor for Apple Silicon Macs running Tahoe or newer, with a SwiftPM-first build path.
+A fast native plain-code editor for macOS 26, built for developers who want a lightweight SwiftUI-first alternative to heavyweight IDEs, with syntax highlighting that stays near-instant across hundreds of bundled language definitions.
+
+SwiftlyCodeEdit is a hard fork of [CodeEdit](https://github.com/CodeEditApp/CodeEdit), stripped down to a focused plain-text and code editor, with a SwiftPM-first build path targeting Apple Silicon Macs.
 
 ## Documentation
 
-- [docs/REPO_STYLE.md](docs/REPO_STYLE.md): repo-wide workflow, file organization, and maintenance rules.
-- [docs/PYTHON_STYLE.md](docs/PYTHON_STYLE.md): Python rules for scripts and automation.
-- [docs/PYTEST_STYLE.md](docs/PYTEST_STYLE.md): pytest structure, fixture policy, and brittle-test avoidance.
-- [docs/CLAUDE_HOOK_USAGE_GUIDE.md](docs/CLAUDE_HOOK_USAGE_GUIDE.md): allowed command patterns and file-search guidance for agents.
-- [docs/MARKDOWN_STYLE.md](docs/MARKDOWN_STYLE.md): Markdown conventions for this repo.
-- [docs/COLOR_CONTRAST_ACCESSIBILITY.md](docs/COLOR_CONTRAST_ACCESSIBILITY.md): color contrast and accessibility guidance.
-- [docs/E2E_TESTS.md](docs/E2E_TESTS.md): end-to-end test layout and usage.
-- [docs/AUTHORS.md](docs/AUTHORS.md): project authors and background.
+- [docs/CODE_ARCHITECTURE.md](docs/CODE_ARCHITECTURE.md): high-level system design, major components, and data flow.
+- [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md): directory map with what belongs where, including generated assets.
+- [docs/INSTALL.md](docs/INSTALL.md): setup steps, dependencies, and environment requirements.
+- [docs/USAGE.md](docs/USAGE.md): how to run the app and its scripts, with practical examples.
+- [docs/SCOPE.md](docs/SCOPE.md): what this fork keeps, cuts, and defers relative to upstream CodeEdit.
+- [docs/DEVELOPER_USAGE.md](docs/DEVELOPER_USAGE.md): full build, packaging, and smoke-test reference.
+
+More reference docs (style guides, the Kate syntax pipeline, theming, related projects) live under `docs/`; see `AGENTS.md` for the full agent-facing index.
 
 ## Quick start
 
@@ -24,8 +26,3 @@ A fast native code editor for macOS. It is a lightweight Swift/SwiftUI-first tex
 <!-- screenshots:begin (managed by screenshot-docs) -->
 ![Plain editor window with top command bar and bottom status bar](docs/screenshots/codeedit_window.png)
 <!-- screenshots:end -->
-
-## Notes
-
-- This fork does not currently ship separate `docs/INSTALL.md`, `docs/USAGE.md`, or `docs/TROUBLESHOOTING.md` files.
-- The upstream project also includes community, contribution, and sponsorship content; keep that detail in the repo docs rather than expanding this front page.

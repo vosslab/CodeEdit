@@ -1,143 +1,136 @@
-# Related and Reference Projects
-
-## Purpose
-
-This document maps related repositories and reference projects.
-
-It separates inherited CodeEdit ecosystem projects from external reference projects. The goal is to make the repo easier to understand without assuming that every inherited dependency still belongs in the current product.
+# Related projects
 
 Current milestone: lightweight macOS text editor with syntax highlighting, not an IDE.
 
-## CodeEdit Ecosystem and Inherited Projects
+## Confirmed related projects
 
 ### CodeEdit
-
-- Relationship: upstream source and parent project
+- Relationship: upstream source and parent project (hard fork)
 - Link: https://github.com/CodeEditApp/CodeEdit
-- Status for this repo: upstream ancestry and source material
-- Evidence: this repo started from the CodeEdit ecosystem, and local packages link back to CodeEditApp repositories.
-- Notes: useful for understanding inherited architecture, but inherited architecture can be simplified when it conflicts with the current scope.
+- Evidence: `git remote -v` shows `origin` as `git@github.com:vosslab/CodeEdit.git`, and the
+  commit history starts from an imported CodeEdit tree before repo-specific rework began.
+- Notes: useful for understanding inherited architecture, which is trimmed aggressively where it
+  conflicts with the current plain-editor scope. See `docs/SCOPE.md` for scope boundaries.
 
 ### CodeEditTextView
-
-- Relationship: companion library and lower-level editor surface
+- Relationship: direct dependency (vendored SwiftPM package)
 - Link: https://github.com/CodeEditApp/CodeEditTextView
-- Status for this repo: high-value reference and possible active editor surface
-- Evidence: the project describes itself as a text editor specialized for displaying and editing code documents. It lists basic text editing, extremely fast initial layout, large document handling, and customization options for code documents. ([GitHub](https://github.com/CodeEditApp/CodeEditTextView?utm_source=chatgpt.com))
-- Notes: this is the most relevant CodeEdit ecosystem project for the plain-editor path. It is closer to the required editor surface than CodeEditSourceEditor.
-
-### CodeEditSourceEditor
-
-- Relationship: inherited higher-level source-editor facade
-- Link: https://github.com/CodeEditApp/CodeEditSourceEditor
-- Status for this repo: legacy or being removed from the required build path
-- Evidence: the project describes itself as an Xcode-inspired code editor view written in Swift and powered by tree-sitter. It includes syntax highlighting, code completion, find and replace, text diff, validation, current-line highlighting, minimap, inline messages, bracket matching, and more. ([GitHub](https://github.com/CodeEditApp/CodeEditSourceEditor?utm_source=chatgpt.com))
-- Notes: useful for understanding the inherited editor stack, but it is heavier than the current plain-editor milestone.
+- Evidence: `Package.swift` declares `.package(path: "Packages/CodeEditTextView")` as a live
+  dependency; `Packages/CodeEditTextView/README.md` links back to
+  `github.com/CodeEditApp/CodeEditTextView`.
+- Notes: the primary vendored text-editing surface backing the plain-editor path.
 
 ### CodeEditLanguages
-
-- Relationship: companion language metadata and parser package
+- Relationship: direct dependency (vendored SwiftPM package)
 - Link: https://github.com/CodeEditApp/CodeEditLanguages
-- Status for this repo: legacy if tied to tree-sitter-based parser packages
-- Evidence: the project describes its supported languages in terms of tree-sitter grammars and `highlights.scm` files used for syntax highlighting. ([GitHub](https://github.com/CodeEditApp/CodeEditLanguages?utm_source=chatgpt.com))
-- Notes: useful for understanding the old syntax-highlighting path. The current direction favors syntax definitions as data files, not compiled parser packages.
+- Evidence: `Package.swift` declares `.package(path: "Packages/CodeEditLanguages")` as a live
+  dependency; `Packages/CodeEditLanguages/README.md` describes it as providing language
+  identifiers, file-extension detection, and bundled syntax-definition resources for this repo.
+- Notes: its README has been trimmed locally to drop parser-runtime language (this repo does not
+  use tree-sitter parser packages); the current syntax-highlighting path is the Kate XML pipeline
+  in `CodeEditSyntaxDefinitions` and `CodeEditHighlighting` instead.
 
-### CodeEditKit
+### CodeEditSourceEditor
+- Relationship: vendored find-panel harvest source, deletion planned
+- Link: https://github.com/CodeEditApp/CodeEditSourceEditor
+- Evidence: present under `Packages/CodeEditSourceEditor/` and in `OTHER_REPOS/repos.txt` as a
+  reference clone, but not declared as a dependency in `Package.swift`; kept only so its
+  find-and-replace panel implementation can be harvested before the package is deleted.
+- Notes: heavier, tree-sitter-based editor facade than the current plain-editor milestone needs;
+  do not treat it as a live build dependency.
 
-- Relationship: companion extension-facing library
-- Link: https://github.com/CodeEditApp/CodeEditKit
-- Status for this repo: inherited support package, evaluate and trim
-- Evidence: CodeEdit ecosystem package documentation identifies CodeEditKit as part of the shared CodeEdit package family.
-- Notes: useful only where it directly supports the current app. Extension-platform machinery should not drive the plain-editor build path.
-
-### CodeEditCLI
-
-- Relationship: companion CLI
-- Link: https://github.com/CodeEditApp/CodeEditCLI
-- Status for this repo: out of scope for the current milestone
-- Evidence: the project is a command-line companion in the CodeEdit ecosystem.
-- Notes: useful as ecosystem context, but not needed for the current plain-editor app build.
-
-## External Reference Projects and Prior Art
+### KDE syntax-highlighting (KSyntaxHighlighting)
+- Relationship: format source for syntax-definition data (not a code dependency)
+- Link: https://github.com/KDE/syntax-highlighting
+- Evidence: XML syntax-definition files bundled under `CodeEditSyntaxDefinitions` (for example
+  `swift.xml`) use the Kate `<!DOCTYPE language>` XML schema; `docs/SYNTAX_RULESET_COMPARISON.md`
+  and `docs/CODE_ARCHITECTURE.md` document the "Kate XML interpreter" pipeline this repo builds
+  against that format.
+- Notes: `CodeEditHighlighting` and `CodeEditSyntaxDefinitions` are first-party packages authored
+  in this fork (no CodeEditApp upstream link in their own manifests); they consume Kate-format
+  syntax-definition data rather than vendoring KDE's C++ engine or Swift code.
 
 ### CodeEditorView
-
-- Relationship: same-domain SwiftUI code editor component
+- Relationship: same-domain SwiftUI code editor component, prior art
 - Link: https://github.com/mchakravarty/CodeEditorView
-- Status for this repo: reference only
-- Evidence: the README describes a SwiftUI code editor view for iOS, visionOS, and macOS. It is based on TextKit 2 and includes syntax highlighting, configurable themes, inline messages, bracket matching, completion, and minimap support. ([GitHub](https://github.com/mchakravarty/CodeEditorView?utm_source=chatgpt.com))
-- Confidence: high
-- Notes: useful for SwiftUI/TextKit 2 editor architecture. Some features are beyond the current plain-editor milestone.
+- Evidence: cloned into `OTHER_REPOS/CodeEditorView/` as a read-only reference; the upstream
+  README describes a SwiftUI code editor view for iOS, visionOS, and macOS built on TextKit 2 with
+  syntax highlighting, configurable themes, inline messages, bracket matching, completion, and a
+  minimap.
+- Notes: useful for SwiftUI/TextKit 2 editor architecture; some features exceed the current
+  plain-editor milestone.
 
 ### SwiftEdit
-
 - Relationship: historical prior art
 - Link: https://github.com/jpsim/SwiftEdit
-- Status for this repo: reference only
-- Evidence: the README describes it as a proof-of-concept Swift editor with Swift syntax highlighting using SourceKitten.
-- Confidence: high
-- Notes: useful historically, but old enough that it should not define modern Swift 6 or macOS 26 architecture.
-
-### CodeEditor
-
-- Relationship: same-domain SwiftUI editor component
-- Link: https://github.com/ZeeZide/CodeEditor
-- Status for this repo: cautionary reference
-- Evidence: the README describes it as a SwiftUI `TextEditor` view with syntax highlighting using Highlight.js through Highlightr.
-- Confidence: high
-- Notes: useful for SwiftUI editor wrapping ideas, but the Highlight.js/Highlightr path does not match the preferred native syntax-definition direction.
+- Evidence: cloned into `OTHER_REPOS/` per `OTHER_REPOS/repos.txt`; described upstream as a
+  proof-of-concept Swift editor with Swift syntax highlighting using SourceKitten.
+- Notes: old enough that it should not define current Swift 6 or macOS 26 architecture.
 
 ### SwiftCodeEditor
-
-- Relationship: same-domain SwiftUI editor component
+- Relationship: same-domain SwiftUI editor component, cautionary reference
 - Link: https://github.com/jankammerath/SwiftCodeEditor
-- Status for this repo: cautionary reference
-- Evidence: the README describes it as a SwiftUI `TextEditor` view with syntax highlighting using Highlight.js through Highlightr.
-- Confidence: high
-- Notes: useful only as prior art for SwiftUI packaging. It does not match the preferred direction because it depends on a JavaScript-based highlighter stack.
+- Evidence: cloned into `OTHER_REPOS/SwiftCodeEditor/` per `OTHER_REPOS/repos.txt`; described
+  upstream as a SwiftUI `TextEditor` view with syntax highlighting via Highlight.js through
+  Highlightr.
+- Notes: useful only as SwiftUI packaging prior art; its JavaScript-based highlighter stack does
+  not match this repo's native Kate-XML-based direction.
 
-### RichEditorSwiftUI
-
-- Relationship: adjacent editor work
+### rich-editor-swiftui
+- Relationship: adjacent editor work, low relevance
 - Link: https://github.com/canopas/rich-editor-swiftui
-- Status for this repo: low relevance
-- Evidence: the project is a SwiftUI rich text editor wrapper, focused on rich text editing rather than source-code editing.
-- Confidence: medium
-- Notes: possibly useful for SwiftUI/UIKit or AppKit bridging concepts, but it is not a code editor reference.
+- Evidence: cloned into `OTHER_REPOS/rich-editor-swiftui/` per `OTHER_REPOS/repos.txt`; the
+  project is a SwiftUI rich-text editor wrapper, not a source-code editor.
+- Notes: possibly useful for SwiftUI/AppKit bridging concepts only.
 
-### SwiftUI Code Editor Article
+### Editor (mmackh)
+- Relationship: external reference project, unevaluated
+- Link: https://github.com/mmackh/Editor
+- Evidence: cloned into `OTHER_REPOS/Editor/` per `OTHER_REPOS/repos.txt`.
+- Notes: evaluate from the upstream README, package manifest, license, and source structure
+  before assigning it architectural weight; not yet confirmed as relevant beyond the clone itself.
 
+### Building a Code Editor Using SwiftUI (article)
 - Relationship: article-level prior art
 - Link: https://sebwhitfield.medium.com/building-a-code-editor-using-swiftui-bb74819b5c1f
-- Status for this repo: reference only
-- Evidence: article about building a code editor using SwiftUI.
-- Confidence: medium
+- Evidence: listed in `OTHER_REPOS/repos.txt` and saved as an HTML capture in `OTHER_REPOS/`.
 - Notes: useful as design background, not as an implementation source of truth.
 
-### Editor
+## Commonly confused unrelated projects
 
-- Relationship: external reference project
-- Link: https://github.com/mmackh/Editor
-- Status for this repo: evaluate before assigning architectural weight
-- Evidence: not confirmed from reliable web search in this pass.
-- Confidence: unknown
-- Notes: evaluate from the upstream README, package manifest, license, and source structure before assigning it architectural weight.
+### CodeEditKit
+- Was previously listed in this doc as an inherited CodeEdit-ecosystem dependency. It shipped in
+  `Packages/CodeEditKit` but was never a `Package.swift` dependency, and was deleted from the repo
+  on 2026-07-09 as part of a 721-file legacy purge (see `docs/CHANGELOG.md`). No longer relevant
+  to this repo's build.
 
-## Current Interpretation
+### WelcomeWindow
+- A local package under `Packages/WelcomeWindow` that was never a `Package.swift` dependency;
+  deleted on 2026-07-09 in the same legacy purge as CodeEditKit. Not a live dependency.
 
-The most relevant projects for the current plain-editor direction are:
+### AboutWindow
+- Was previously listed in this doc as a direct dependency (vendored SwiftPM package). It shipped
+  in `Packages/AboutWindow` and backed the About window feature (`CodeEdit/Features/About/`), but
+  WP-P5 deleted the dead About window feature and its now-orphaned `Packages/AboutWindow`
+  dependency on 2026-07-09 as part of the live-target dead-code removal (see
+  `docs/CHANGELOG.md`). No longer a live dependency.
 
-1. `CodeEditTextView`
-   - Most useful inherited editor-surface reference.
+### CodeEditSymbols
+- Was previously listed in this doc as a direct dependency (vendored SwiftPM package). It shipped
+  in `Packages/CodeEditSymbols` and supplied custom SF Symbols-derived assets for the About window
+  feature, but WP-P5 deleted it on 2026-07-09 alongside the About window feature it was orphaned
+  by (see `docs/CHANGELOG.md`). No longer a live dependency.
 
-2. `CodeEditorView`
-   - Useful SwiftUI/TextKit 2 architecture reference.
+## Evidence notes
 
-3. `CodeEditSourceEditor`
-   - Useful mainly as inherited context and cautionary reference because it includes heavier source-editor and IDE-adjacent behavior.
-
-4. `CodeEditLanguages`
-   - Useful mainly as inherited syntax-highlighting context. It does not match the preferred data-file syntax-definition direction.
-
-5. `CodeEditor` and `SwiftCodeEditor`
-   - Useful as SwiftUI editor prior art, but not as a preferred highlighting path because they use Highlight.js/Highlightr.
+Confirmed entries come primarily from `Package.swift` (the four live SwiftPM path dependencies:
+CodeEditHighlighting, CodeEditLanguages, CodeEditTextView, CodeEditSyntaxDefinitions), the
+vendoring commit `a61afbd`, and the vendored packages' own README files that still link back to
+`github.com/CodeEditApp/...`. `CodeEditSourceEditor` is vendored but not wired as a dependency,
+matching its "harvest source, deletion planned" status. `CodeEditHighlighting` and
+`CodeEditSyntaxDefinitions` carry no CodeEditApp upstream link in their own manifests; their
+relevant upstream is the KDE `syntax-highlighting` (KSyntaxHighlighting) project, whose XML schema
+their bundled `.xml` definition files and Swift interpreter target. `OTHER_REPOS/repos.txt` is the
+source list for the read-only external reference clones. AboutWindow and CodeEditSymbols were
+deleted from `Package.swift` by WP-P5's dead-code purge and moved to "Commonly confused unrelated
+projects" below.

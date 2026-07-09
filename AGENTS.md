@@ -12,6 +12,20 @@
 - docs/FILE_STRUCTURE.md
 - docs/CHANGELOG.md
 
+- docs/INSTALL.md
+- docs/USAGE.md
+- docs/FILE_FORMATS.md
+- docs/THEME_FORMAT.md
+- docs/RELATED_PROJECTS.md
+- docs/TROUBLESHOOTING.md
+- docs/ROADMAP.md
+- docs/TODO.md
+- docs/NEWS.md
+- MILESTONE3_CHECKLIST.md
+- docs/DEVELOPER_USAGE.md
+- docs/SMOKE_TEST.md
+- docs/E2E_TESTS.md
+
 - Run Python tests with `pytest tests/` and keep to Python 3.12.
 - Homebrew Python modules live in `/opt/homebrew/lib/python3.12/site-packages/`.
 - When making edits, record them in `docs/CHANGELOG.md`.
