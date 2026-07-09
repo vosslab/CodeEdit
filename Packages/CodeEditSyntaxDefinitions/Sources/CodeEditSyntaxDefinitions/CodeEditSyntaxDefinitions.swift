@@ -10,12 +10,11 @@ public enum CodeEditSyntaxDefinitions {
         SyntaxDefinitionRepository.shared.debugSummary(language: language)
     }
 
-    public static func kateDefinitionXML(named name: String) throws -> String {
-        let url = Bundle.module.url(forResource: name, withExtension: "xml", subdirectory: "Kate")
-            ?? Bundle.module.url(forResource: name, withExtension: "xml")
-        guard let url else {
-            throw SyntaxDefinitionError.missingDefinition(name: name)
-        }
+	public static func kateDefinitionXML(named name: String) throws -> String {
+		let url = Bundle.module.url(forResource: name, withExtension: "xml")
+		guard let url else {
+			throw SyntaxDefinitionError.missingDefinition(name: name)
+		}
         return try String(contentsOf: url, encoding: .utf8)
     }
 }
@@ -187,24 +186,10 @@ public final class SyntaxDefinitionRepository: @unchecked Sendable {
 }
 
 enum SyntaxDefinitionLoader {
-    static func loadBundledFileURLs() -> [String: URL] {
-        if let manifestURL = Bundle.module.url(forResource: "index", withExtension: "json", subdirectory: "Vendor/Kate"),
-           let data = try? Data(contentsOf: manifestURL),
-           let manifest = try? JSONDecoder().decode(SyntaxManifest.self, from: data) {
-            var urls: [String: URL] = [:]
-            for (language, fileName) in manifest.languages {
-                if let url = Bundle.module.url(forResource: fileName, withExtension: nil, subdirectory: "Vendor/Kate") {
-                    urls[language.lowercased()] = url
-                }
-            }
-            if !urls.isEmpty {
-                return urls
-            }
-        }
-
-        let files = Bundle.module.urls(forResourcesWithExtension: "xml", subdirectory: nil) ?? []
-        return Dictionary(uniqueKeysWithValues: files.map { ($0.deletingPathExtension().lastPathComponent.lowercased(), $0) })
-    }
+	static func loadBundledFileURLs() -> [String: URL] {
+		let files = Bundle.module.urls(forResourcesWithExtension: "xml", subdirectory: nil) ?? []
+		return Dictionary(uniqueKeysWithValues: files.map { ($0.deletingPathExtension().lastPathComponent.lowercased(), $0) })
+	}
 
     static func load(from contents: String) -> SyntaxDefinition? {
         guard let language = firstMatch(in: contents, pattern: #"<language\b[^>]*\bname="([^"]+)""#) else {
@@ -332,7 +317,7 @@ enum SyntaxDefinitionLoader {
         entities: [String: String],
         lists: [String: [String]]
     ) -> [SyntaxContextItem] {
-        let tagPattern = #"<(IncludeRules|RegExpr|DetectChar|Detect2Chars|DetectSpaces|DetectIdentifier|StringDetect|WordDetect|AnyChar|Int|Float|RangeDetect|LineContinue|HlCStringChar|HlCChar|HlCOct|HlCHex|keyword)\b([^>]*)/?>"#
+        let tagPattern = #"<(IncludeRules|RegExpr|DetectChar|Detect2Chars|DetectSpaces|DetectIdentifier|StringDetect|WordDetect|AnyChar|Int|Float|RangeDetect|LineContinue|HlCStringChar|HlCChar|HlCOct|HlCHex|keyword)\b((?:[^">]|"[^"]*")*)/?>"#
         return matches(in: contents, pattern: tagPattern, options: [.dotMatchesLineSeparators])
             .compactMap { match -> SyntaxContextItem? in
                 guard match.count >= 3 else { return nil }
@@ -396,8 +381,8 @@ enum SyntaxDefinitionLoader {
                     guard let string = attributes["String"] else { return nil }
                     let escaped = expandPattern(string, entities: entities)
                         .map { NSRegularExpression.escapedPattern(for: String($0)) }
-                        .joined()
-                    return SyntaxRule(pattern: compiledPattern("[" + escaped + "]", insensitive: insensitive, minimal: minimal), token: styleToken, styleName: styleName, context: context, lookAhead: lookAhead, column: column, firstNonSpace: firstNonSpace, minimal: minimal)
+                        .joined(separator: "|")
+                    return SyntaxRule(pattern: compiledPattern("(?:" + escaped + ")", insensitive: insensitive, minimal: minimal), token: styleToken, styleName: styleName, context: context, lookAhead: lookAhead, column: column, firstNonSpace: firstNonSpace, minimal: minimal)
                 case "Int":
                     return SyntaxRule(pattern: compiledPattern(#"\b\d+\b"#, insensitive: insensitive, minimal: minimal), token: styleToken, styleName: styleName, context: context, lookAhead: lookAhead, column: column, firstNonSpace: firstNonSpace, minimal: minimal)
                 case "Float":
@@ -585,10 +570,6 @@ private func highlightToken(for attribute: String) -> HighlightToken {
 private func isStyledAttribute(_ attribute: String) -> Bool {
     let value = attribute.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     return !value.isEmpty && value != "normal text"
-}
-
-private struct SyntaxManifest: Decodable {
-    let languages: [String: String]
 }
 
 enum KateContextRuleInterpreter {

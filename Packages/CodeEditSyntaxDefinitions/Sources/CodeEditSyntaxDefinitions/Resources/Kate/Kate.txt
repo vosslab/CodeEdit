@@ -1,1 +1,0 @@
-Kate syntax definitions live here.

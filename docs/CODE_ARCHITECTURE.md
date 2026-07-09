@@ -8,18 +8,18 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
 
 ## Major components
 
-- [`CodeEdit/CodeEditApp.swift`](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
+- [CodeEditApp.swift](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
 - `CodeEdit/Features/SmokeTesting/PlainEditorSmokeIntents.swift`: narrow App Intents smoke hooks for deterministic open/edit/save/reopen validation.
-- [`CodeEdit/Features/Editor/Views/CodeFileView.swift`](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
-- [`CodeEdit/Features/Editor/Views/PlainTextEditorView.swift`](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
+- [CodeFileView.swift](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
+- [PlainTextEditorView.swift](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
 - `CodeEdit/Features/Editor/PlainEditorTextCleaner.swift`: deterministic text-cleaning helpers used by the Clean Text command.
 - `CodeEdit/Features/Editor/PlainEditorStatusReporter.swift`: shared status-label logic for cursor, words, indentation, encoding, line endings, and language labels.
-- [`CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift`](../CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift): document model for open, edit, autosave, and external-change handling.
-- [`Packages/CodeEditHighlighting/`](../Packages/CodeEditHighlighting/): shared highlighting model and Kate XML interpreter.
-- [`Packages/CodeEditTextView/`](../Packages/CodeEditTextView/): local text-view package that provides the editable text surface.
-- [`Packages/CodeEditLanguages/`](../Packages/CodeEditLanguages/): language metadata used for syntax selection.
-- [`Packages/CodeEditSyntaxDefinitions/`](../Packages/CodeEditSyntaxDefinitions/): syntax definition data files.
-- [`DefaultThemes/`](../DefaultThemes/): theme data files.
+- [CodeFileDocument.swift](../CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift): document model for open, edit, autosave, and external-change handling.
+- `CodeEditHighlighting`: shared highlighting model and Kate XML interpreter.
+- `CodeEditTextView`: local text-view package that provides the editable text surface.
+- `CodeEditLanguages`: language metadata used for syntax selection.
+- `CodeEditSyntaxDefinitions`: syntax definition data files.
+- `DefaultThemes`: theme data files.
 
 ## Required build path
 

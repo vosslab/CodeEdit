@@ -4,16 +4,18 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 @main
-struct CodeEditApp: App {
-    @NSApplicationDelegateAdaptor(PlainEditorAppDelegate.self) private var appDelegate
+@MainActor
+enum CodeEditMain {
+    private static let appDelegate = PlainEditorAppDelegate()
 
-    var body: some Scene {
-        Settings {
-            EmptyView()
-        }
-        .commands {
-            PlainEditorCommands(appDelegate: appDelegate)
-        }
+    static func main() {
+        let application = NSApplication.shared
+        application.setActivationPolicy(.regular)
+        application.delegate = appDelegate
+        application.mainMenu = PlainEditorMainMenu.make(appDelegate: appDelegate)
+        application.finishLaunching()
+        appDelegate.finishPlainEditorLaunch()
+        application.run()
     }
 }
 
@@ -26,6 +28,10 @@ final class PlainEditorAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        finishPlainEditorLaunch()
+    }
+
+    func finishPlainEditorLaunch() {
         NSApp.activate(ignoringOtherApps: true)
         #if DEBUG
         debugRuntimeLog("Plain editor launch path ready: file-backed editor, open/save commands registered")
@@ -37,7 +43,7 @@ final class PlainEditorAppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func openDefaultSourceFileIfNeeded() {
+    func openDefaultSourceFileIfNeeded() {
         guard NSDocumentController.shared.documents.isEmpty else { return }
         if let override = smokeSourceFileURL() {
             openDocument(at: override)
@@ -118,6 +124,69 @@ final class PlainEditorAppDelegate: NSObject, NSApplicationDelegate {
         NSApp.sendAction(#selector(NSDocument.saveAs(_:)), to: nil, from: nil)
     }
 
+    @objc func newDocumentMenuItem(_ sender: Any?) {
+        NSDocumentController.shared.newDocument(sender)
+    }
+
+    @objc func openDocumentMenuItem(_ sender: Any?) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            self.openDocument(at: url)
+        }
+    }
+
+    @objc func openExampleSourceMenuItem(_ sender: Any?) {
+        let repoRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let defaultFile = repoRoot.appendingPathComponent(
+            "CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift"
+        )
+        openDocument(at: defaultFile)
+    }
+
+    @objc func saveMenuItem(_ sender: Any?) {
+        saveActiveDocument()
+    }
+
+    @objc func saveAsMenuItem(_ sender: Any?) {
+        saveActiveDocumentAs()
+    }
+
+    @objc func closeMenuItem(_ sender: Any?) {
+        NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: NSApp.keyWindow, from: sender)
+    }
+
+    @objc func undoMenuItem(_ sender: Any?) {
+        undo()
+    }
+
+    @objc func redoMenuItem(_ sender: Any?) {
+        redo()
+    }
+
+    @objc func cutMenuItem(_ sender: Any?) {
+        cut()
+    }
+
+    @objc func copyMenuItem(_ sender: Any?) {
+        _ = actionRouter.copy()
+    }
+
+    @objc func pasteMenuItem(_ sender: Any?) {
+        paste()
+    }
+
+    @objc func selectAllMenuItem(_ sender: Any?) {
+        selectAll()
+    }
+
+    @objc func cleanTextMenuItem(_ sender: Any?) {
+        cleanText()
+    }
+
     func undo() {
         _ = actionRouter.undo()
     }
@@ -173,6 +242,13 @@ final class PlainEditorActionRouter: ObservableObject {
     @Published var canCleanText = false
 
     private weak var activeTextView: TextView?
+    private var copiedText: String?
+
+    #if DEBUG
+    var debugCopiedText: String? {
+        copiedText
+    }
+    #endif
 
     func register(textView: TextView) {
         activeTextView = textView
@@ -198,13 +274,23 @@ final class PlainEditorActionRouter: ObservableObject {
 
     func copy() -> Bool {
         guard let activeTextView else { return false }
-        activeTextView.copy(activeTextView)
+        let range = activeTextView.selectedRange()
+        guard range.location != NSNotFound, range.length > 0 else { return false }
+        let selectedText = (activeTextView.string as NSString).substring(with: range)
+        copiedText = selectedText
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(selectedText, forType: .string)
         return true
     }
 
     func paste() -> Bool {
-        guard let activeTextView else { return false }
-        activeTextView.paste(activeTextView)
+        guard let activeTextView,
+              let pasteText = copiedText ?? NSPasteboard.general.string(forType: .string) else {
+            return false
+        }
+        let range = activeTextView.selectedRange()
+        let replacementRange = range.location == NSNotFound ? NSRange(location: activeTextView.string.utf16.count, length: 0) : range
+        activeTextView.replaceCharacters(in: replacementRange, with: pasteText)
         return true
     }
 
@@ -224,6 +310,92 @@ final class PlainEditorActionRouter: ObservableObject {
             with: cleaned
         )
         return true
+    }
+}
+
+@MainActor
+private enum PlainEditorMainMenu {
+    static func make(appDelegate: PlainEditorAppDelegate) -> NSMenu {
+        let mainMenu = NSMenu()
+        mainMenu.addItem(appMenu())
+        mainMenu.addItem(fileMenu(appDelegate: appDelegate))
+        mainMenu.addItem(editMenu(appDelegate: appDelegate))
+        mainMenu.addItem(findMenu())
+        return mainMenu
+    }
+
+    private static func appMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "CodeEdit")
+        menu.addItem(withTitle: "Quit CodeEdit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        item.submenu = menu
+        return item
+    }
+
+    private static func fileMenu(appDelegate: PlainEditorAppDelegate) -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "File")
+        menu.addItem(menuItem("New", "n", #selector(PlainEditorAppDelegate.newDocumentMenuItem(_:)), appDelegate))
+        menu.addItem(menuItem("Open...", "o", #selector(PlainEditorAppDelegate.openDocumentMenuItem(_:)), appDelegate))
+        menu.addItem(menuItem(
+            "Open Example Source",
+            "",
+            #selector(PlainEditorAppDelegate.openExampleSourceMenuItem(_:)),
+            appDelegate
+        ))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(menuItem("Save", "s", #selector(PlainEditorAppDelegate.saveMenuItem(_:)), appDelegate))
+        let saveAs = menuItem("Save As...", "s", #selector(PlainEditorAppDelegate.saveAsMenuItem(_:)), appDelegate)
+        saveAs.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(saveAs)
+        menu.addItem(menuItem("Close", "w", #selector(PlainEditorAppDelegate.closeMenuItem(_:)), appDelegate))
+        item.submenu = menu
+        return item
+    }
+
+    private static func editMenu(appDelegate: PlainEditorAppDelegate) -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "Edit")
+        menu.addItem(menuItem("Undo", "z", #selector(PlainEditorAppDelegate.undoMenuItem(_:)), appDelegate))
+        let redo = menuItem("Redo", "z", #selector(PlainEditorAppDelegate.redoMenuItem(_:)), appDelegate)
+        redo.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(redo)
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(menuItem("Cut", "x", #selector(PlainEditorAppDelegate.cutMenuItem(_:)), appDelegate))
+        menu.addItem(menuItem("Copy", "c", #selector(PlainEditorAppDelegate.copyMenuItem(_:)), appDelegate))
+        menu.addItem(menuItem("Paste", "v", #selector(PlainEditorAppDelegate.pasteMenuItem(_:)), appDelegate))
+        menu.addItem(menuItem("Select All", "a", #selector(PlainEditorAppDelegate.selectAllMenuItem(_:)), appDelegate))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(menuItem("Clean Text", "", #selector(PlainEditorAppDelegate.cleanTextMenuItem(_:)), appDelegate))
+        item.submenu = menu
+        return item
+    }
+
+    private static func findMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "Find")
+        menu.addItem(withTitle: "Find...", action: #selector(NSTextView.performFindPanelAction(_:)), keyEquivalent: "f")
+        let replace = NSMenuItem(
+            title: "Find and Replace...",
+            action: #selector(NSTextView.performFindPanelAction(_:)),
+            keyEquivalent: "f"
+        )
+        replace.keyEquivalentModifierMask = [.command, .option]
+        replace.tag = 12
+        menu.addItem(replace)
+        item.submenu = menu
+        return item
+    }
+
+    private static func menuItem(
+        _ title: String,
+        _ keyEquivalent: String,
+        _ action: Selector,
+        _ target: AnyObject
+    ) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
+        item.target = target
+        return item
     }
 }
 

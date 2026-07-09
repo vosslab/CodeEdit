@@ -16,7 +16,13 @@ export SWIFTPM_CONFIG_DIR="$BUILD_CACHE_ROOT/swiftpm-config"
 export SWIFTPM_SECURITY_DIR="$BUILD_CACHE_ROOT/swiftpm-security"
 export HOME="$BUILD_CACHE_ROOT/home"
 
-mkdir -p "$TMPDIR" "$CLANG_MODULE_CACHE_PATH" "$SWIFTPM_CONFIG_DIR" "$SWIFTPM_SECURITY_DIR" "$HOME"
+mkdir -p \
+  "$TMPDIR" \
+  "$CLANG_MODULE_CACHE_PATH" \
+  "$SWIFTPM_CONFIG_DIR" \
+  "$SWIFTPM_SECURITY_DIR" \
+  "$HOME" \
+  "$REPO_ROOT/.build/artifacts"
 
 build_pid=""
 cleanup() {

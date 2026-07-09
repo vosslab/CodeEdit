@@ -22,14 +22,10 @@ let package = Package(
             dependencies: [
                 .product(name: "CodeEditHighlighting", package: "CodeEditHighlighting")
             ],
-            path: "Sources/CodeEditSyntaxDefinitions",
-            resources: [
-                .process("Resources/Vendor/Kate"),
-                .process("Resources/Kate"),
-                .process("Resources/TextMate"),
-                .process("Resources/Sublime"),
-                .process("Resources/Themes")
-            ]
-        )
+			path: "Sources/CodeEditSyntaxDefinitions",
+			resources: [
+				.process("Resources/Vendor/Kate")
+			]
+		)
     ]
 )

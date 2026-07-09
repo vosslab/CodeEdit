@@ -105,10 +105,7 @@ let package = Package(
             dependencies: [
                 "CodeEdit",
             ],
-            path: "CodeEditTests/PackageSmoke",
-            sources: [
-                "CodeFileDocumentLifecycleTests.swift"
-            ]
+            path: "CodeEditTests/PackageSmoke"
         ),
     ]
 )

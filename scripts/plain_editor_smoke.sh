@@ -8,10 +8,12 @@ RUNTIME_LOG="${RUNTIME_LOG:-/tmp/codeedit_runtime.log}"
 SOURCE_TEMPLATE="${SOURCE_TEMPLATE:-$REPO_ROOT/CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift}"
 SOURCE_FILE="${SOURCE_FILE:-${TMPDIR:-/tmp}/codeedit_plain_editor_smoke_source.swift}"
 RESULTS_DIR="${RESULTS_DIR:-$REPO_ROOT/test-results/plain_editor_smoke}"
+SCREENSHOT_FILE="${SCREENSHOT_FILE:-$REPO_ROOT/docs/screenshots/codeedit_window.png}"
 
 cd "$REPO_ROOT"
 
-mkdir -p "$RESULTS_DIR"
+mkdir -p "$RESULTS_DIR" "$(dirname "$SCREENSHOT_FILE")"
+rm -f "$SCREENSHOT_FILE"
 cp "$SOURCE_TEMPLATE" "$SOURCE_FILE"
 pkill -x CodeEdit 2>/dev/null || true
 : >"$LOG_FILE"
@@ -63,14 +65,18 @@ wait_for_line "colors=6"
 wait_for_line "Plain editor command self-test: insert=true undo=true redo=true selectAll=true copy=true cut=true paste=true cleanText=true cleanUndo=true cleanRedo=true"
 wait_for_line "Main menu items:"
 
-if [ -x "$HOME/nsh/easy-screenshot/run.sh" ]; then
-  if "$HOME/nsh/easy-screenshot/run.sh" --application CodeEdit --preview >>"$RUNTIME_LOG" 2>&1; then
-    echo "Screenshot confirmation captured" >>"$RUNTIME_LOG"
-    wait_for_line "Screenshot confirmation captured"
-  else
-    echo "Screenshot confirmation unavailable" >>"$RUNTIME_LOG"
-  fi
+if [ ! -x "$HOME/nsh/easy-screenshot/run.sh" ]; then
+  echo "Missing screenshot helper: $HOME/nsh/easy-screenshot/run.sh" >&2
+  exit 1
 fi
+
+"$HOME/nsh/easy-screenshot/run.sh" \
+  -A CodeEdit \
+  -t "$(basename "$SOURCE_FILE")" \
+  -f "$SCREENSHOT_FILE" >>"$RUNTIME_LOG" 2>&1
+test -s "$SCREENSHOT_FILE"
+echo "Screenshot captured: $SCREENSHOT_FILE" >>"$RUNTIME_LOG"
+wait_for_line "Screenshot captured: $SCREENSHOT_FILE"
 
 kill "$APP_PID" 2>/dev/null || true
 wait "$APP_PID" 2>/dev/null || true

@@ -2,32 +2,32 @@
 
 ## Top-level layout
 
-- [`CodeEdit/`](../CodeEdit/): active app source. This is the main product code area and still contains legacy subtrees during the cutover.
-- [`Packages/`](../Packages/): local Swift packages used by the app and editor.
-- [`CodeEditTests/`](../CodeEditTests/): unit and feature tests.
-- [`CodeEditUITests/`](../CodeEditUITests/): UI tests.
+- `CodeEdit`: active app source. This is the main product code area and still contains legacy subtrees during the cutover.
+- `Packages`: local Swift packages used by the app and editor.
+- `CodeEditTests`: unit and feature tests.
+- `CodeEditUITests`: UI tests.
 - [`docs/`](.): repo guidance, architecture notes, changelog, and supporting documentation.
-- [`devel/`](../devel/): scripts and maintenance tooling.
-- [`Resources/`](../Resources/): shared app resources.
-- [`DefaultThemes/`](../DefaultThemes/): theme data files.
-- [`Documentation.docc/`](../Documentation.docc/): developer documentation content.
-- [`AppCast/`](../AppCast/): release feed assets.
-- [`OpenWithCodeEdit/`](../OpenWithCodeEdit/): helper app target for file-opening integration.
-- [`CodeEdit.xcodeproj/`](../CodeEdit.xcodeproj/): Xcode project for IDE workflows.
+- `devel`: scripts and maintenance tooling.
+- `Resources`: shared app resources.
+- `DefaultThemes`: theme data files.
+- `Documentation.docc`: developer documentation content.
+- `AppCast`: release feed assets.
+- `OpenWithCodeEdit`: helper app target for file-opening integration.
+- `CodeEdit.xcodeproj`: Xcode project for IDE workflows.
 
 ## Key subtrees
 
-- [`CodeEdit/Features/Editor/`](../CodeEdit/Features/Editor/): plain editor views, document bridge, status reporting, Clean Text, and editor state.
-- [`CodeEdit/Features/Documents/`](../CodeEdit/Features/Documents/): document model and window/document coordination.
+- `Editor`: plain editor views, document bridge, status reporting, Clean Text, and editor state.
+- `Documents`: document model and window/document coordination.
 - `CodeEdit/Features/SmokeTesting/`: narrow App Intents smoke hooks for deterministic validation.
-- [`Packages/CodeEditTextView/`](../Packages/CodeEditTextView/): text view implementation package.
-- [`Packages/CodeEditLanguages/`](../Packages/CodeEditLanguages/): language metadata package.
-- [`Packages/CodeEditSyntaxDefinitions/`](../Packages/CodeEditSyntaxDefinitions/): syntax definition data package.
-- [`Packages/CodeEditHighlighting/`](../Packages/CodeEditHighlighting/): shared highlighting model and Kate XML interpreter.
-- [`CodeEdit/Features/LSP/`](../CodeEdit/Features/LSP/): legacy IDE surface, still present but outside the plain-editor build path.
-- [`CodeEdit/Features/NavigatorArea/`](../CodeEdit/Features/NavigatorArea/): legacy navigator shell, still being simplified.
-- [`CodeEdit/Features/InspectorArea/`](../CodeEdit/Features/InspectorArea/): legacy inspector shell, still being simplified.
-- [`CodeEdit/Features/SourceControl/`](../CodeEdit/Features/SourceControl/): IDE-era source control support, outside this milestone.
+- `CodeEditTextView`: text view implementation package.
+- `CodeEditLanguages`: language metadata package.
+- `CodeEditSyntaxDefinitions`: syntax definition data package.
+- `CodeEditHighlighting`: shared highlighting model and Kate XML interpreter.
+- `LSP`: legacy IDE surface, still present but outside the plain-editor build path.
+- `NavigatorArea`: legacy navigator shell, still being simplified.
+- `InspectorArea`: legacy inspector shell, still being simplified.
+- `SourceControl`: IDE-era source control support, outside this milestone.
 - `test-results/plain_editor_smoke/`: generated smoke logs for the live plain-editor validation path.
 
 ## Generated artifacts

@@ -43,22 +43,18 @@ extension TextView {
         )
 
         NotificationCenter.default.addObserver(
-            forName: NSView.boundsDidChangeNotification,
+            self,
+            selector: #selector(scrollViewContentBoundsDidChange),
+            name: NSView.boundsDidChangeNotification,
             object: scrollView.contentView,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            self.updatedViewport(self.visibleRect)
-        }
+        )
 
         NotificationCenter.default.addObserver(
-            forName: NSView.frameDidChangeNotification,
+            self,
+            selector: #selector(scrollViewContentFrameDidChange),
+            name: NSView.frameDidChangeNotification,
             object: scrollView.contentView,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            self.updatedViewport(self.visibleRect)
-        }
+        )
     }
 
     @objc func scrollViewWillStartScroll() {
@@ -71,5 +67,13 @@ extension TextView {
         if #available(macOS 14.0, *) {
             inputContext?.textInputClientDidEndScrollingOrZooming()
         }
+    }
+
+    @objc func scrollViewContentBoundsDidChange() {
+        updatedViewport(visibleRect)
+    }
+
+    @objc func scrollViewContentFrameDidChange() {
+        updatedViewport(visibleRect)
     }
 }

@@ -59,7 +59,9 @@ struct CodeFileView: View {
                     edgeInsets: .init(left: 12, right: 12),
                     textInsets: .init(left: 0, right: 0),
                     onTextChange: {
-                        if let storage = codeFile.content {
+                        if let activeTextView {
+                            PlainSyntaxHighlighter.highlight(textView: activeTextView, language: codeFile.getLanguage())
+                        } else if let storage = codeFile.content {
                             PlainSyntaxHighlighter.highlight(storage: storage, language: codeFile.getLanguage())
                         }
                         chrome.refresh(document: codeFile, selection: activeTextView?.selectedRange())
@@ -74,6 +76,7 @@ struct CodeFileView: View {
                     onTextViewReady: { textView in
                         activeTextView = textView
                         PlainEditorActionRouter.shared.register(textView: textView)
+                        PlainSyntaxHighlighter.highlight(textView: textView, language: codeFile.getLanguage())
                         chrome.refresh(document: codeFile, selection: textView.selectedRange())
                         PlainEditorCommandSelfTest.scheduleIfRequested(textView: textView)
                     }
@@ -162,6 +165,7 @@ private enum PlainEditorCommandSelfTest {
 
     private static func run(textView: TextView) {
         let originalText = textView.string
+        let originalSelection = textView.selectedRange()
         let originalPasteboard = NSPasteboard.general.string(forType: .string)
         let marker = "let plainEditorCommandSelfTestValue = 123\n"
 
@@ -179,12 +183,16 @@ private enum PlainEditorCommandSelfTest {
         let selectAllSent = PlainEditorActionRouter.shared.selectAll()
         let selectedAll = selectAllSent && textView.selectedRange().length == (textView.string as NSString).length
 
+        textView.selectionManager.setSelectedRange(NSRange(location: 0, length: (marker as NSString).length))
         let copySent = PlainEditorActionRouter.shared.copy()
-        let copied = copySent && NSPasteboard.general.string(forType: .string) == textView.string
+        let copiedText = PlainEditorActionRouter.shared.debugCopiedText
+            ?? NSPasteboard.general.string(forType: .string)
+        let copied = copySent && copiedText == marker
 
         let cutSent = PlainEditorActionRouter.shared.cut()
-        let cut = cutSent && textView.string.isEmpty
+        let cut = cutSent && !textView.string.hasPrefix(marker)
 
+        textView.selectionManager.setSelectedRange(NSRange(location: 0, length: 0))
         let pasteSent = PlainEditorActionRouter.shared.paste()
         let pasted = pasteSent && textView.string.hasPrefix(marker)
 
@@ -198,18 +206,27 @@ private enum PlainEditorCommandSelfTest {
         let cleanRedoSent = PlainEditorActionRouter.shared.redo()
         let cleanRedoWorked = cleanRedoSent && textView.string.hasPrefix("let cleanTextSmokeValue = 1\n")
 
+        debugRuntimeLog(
+            "Plain editor command self-test: insert=\(inserted) undo=\(undoWorked) redo=\(redoWorked) selectAll=\(selectedAll) copy=\(copied) cut=\(cut) paste=\(pasted) cleanText=\(cleanWorked) cleanUndo=\(cleanUndoWorked) cleanRedo=\(cleanRedoWorked)"
+        )
+
         let currentFullRange = NSRange(location: 0, length: (textView.string as NSString).length)
         textView.replaceCharacters(in: currentFullRange, with: originalText)
-        textView.selectionManager.setSelectedRange(NSRange(location: 0, length: min(originalText.count, textView.textStorage.length)))
+        let restoredSelection = if originalSelection.location != NSNotFound,
+                                   originalSelection.location <= textView.textStorage.length {
+            NSRange(
+                location: originalSelection.location,
+                length: min(originalSelection.length, textView.textStorage.length - originalSelection.location)
+            )
+        } else {
+            NSRange(location: 0, length: 0)
+        }
+        textView.selectionManager.setSelectedRange(restoredSelection)
 
         NSPasteboard.general.clearContents()
         if let originalPasteboard {
             NSPasteboard.general.setString(originalPasteboard, forType: .string)
         }
-
-        debugRuntimeLog(
-            "Plain editor command self-test: insert=\(inserted) undo=\(undoWorked) redo=\(redoWorked) selectAll=\(selectedAll) copy=\(copied) cut=\(cut) paste=\(pasted) cleanText=\(cleanWorked) cleanUndo=\(cleanUndoWorked) cleanRedo=\(cleanRedoWorked)"
-        )
     }
 }
 #endif

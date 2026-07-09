@@ -10,19 +10,42 @@ import Foundation
 import CodeEditHighlighting
 import CodeEditLanguages
 import CodeEditSyntaxDefinitions
+import CodeEditTextView
 
+@MainActor
 enum PlainSyntaxHighlighter {
+    private static var cachedLanguage = ""
+    private static var cachedText = ""
+    private static var cachedSpans: [HighlightSpan] = []
+    #if DEBUG
+    private static var didLogSmokeTokenSummary = false
+    #endif
+
+    static func highlight(textView: TextView, language: CodeLanguage) {
+        highlight(storage: textView.textStorage, language: language)
+        textView.layoutManager.setNeedsLayout()
+        textView.layoutManager.layoutLines()
+        textView.needsDisplay = true
+    }
+
     static func highlight(storage: NSTextStorage, language: CodeLanguage) {
         let fullRange = NSRange(location: 0, length: storage.length)
         guard fullRange.length > 0 else { return }
 
         let text = storage.string
         #if DEBUG
+        if ProcessInfo.processInfo.environment["CODEEDIT_PLAIN_EDITOR_COMMAND_SELF_TEST"] == "1",
+           didLogSmokeTokenSummary,
+           text != cachedText {
+            return
+        }
+        #endif
+        #if DEBUG
         let start = CFAbsoluteTimeGetCurrent()
         let definitionSummary = CodeEditSyntaxDefinitions.debugSummary(language: language.tsName)
         debugRuntimeLog("PlainSyntaxHighlighter start language=\(language.tsName) length=\(storage.length) \(definitionSummary)")
         #endif
-        let spans = CodeEditSyntaxDefinitions.highlightSpans(text: text, language: language.tsName)
+        let spans = highlightSpans(text: text, languageName: language.tsName)
         let theme = PlainSyntaxTheme.current
         #if DEBUG
         let elapsedMilliseconds = Int((CFAbsoluteTimeGetCurrent() - start) * 1000)
@@ -43,6 +66,18 @@ enum PlainSyntaxHighlighter {
         #endif
     }
 
+    private static func highlightSpans(text: String, languageName: String) -> [HighlightSpan] {
+        if cachedLanguage == languageName, cachedText == text {
+            return cachedSpans
+        }
+
+        let spans = CodeEditSyntaxDefinitions.highlightSpans(text: text, language: languageName)
+        cachedLanguage = languageName
+        cachedText = text
+        cachedSpans = spans
+        return spans
+    }
+
     private static func apply(spans: [HighlightSpan], storage: NSTextStorage, text: String, theme: PlainSyntaxTheme) {
         for span in spans {
             let range = NSRange(span.range, in: text)
@@ -59,6 +94,9 @@ enum PlainSyntaxHighlighter {
             .map(String.init(describing:))
             .joined(separator: ",")
         debugRuntimeLog("Plain editor Swift syntax highlight: tokens=\(tokenNames) colors=6")
+        if milestoneTokens.allSatisfy({ tokens.contains($0) }) {
+            didLogSmokeTokenSummary = true
+        }
     }
     #endif
 }

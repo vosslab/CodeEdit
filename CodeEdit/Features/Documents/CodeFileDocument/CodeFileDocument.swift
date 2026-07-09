@@ -77,13 +77,16 @@ final class CodeFileDocument: NSDocument, ObservableObject {
     @MainActor
     override func makeWindowControllers() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 750, height: 800),
+            contentRect: NSRect(x: 0, y: 0, width: 960, height: 600),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false
         )
         let windowController = NSWindowController(window: window)
         if let fileURL {
             windowController.shouldCascadeWindows = false
+            if ProcessInfo.processInfo.environment["CODEEDIT_PLAIN_EDITOR_COMMAND_SELF_TEST"] == "1" {
+                UserDefaults.standard.removeObject(forKey: "NSWindow Frame \(fileURL.path)")
+            }
             windowController.windowFrameAutosaveName = fileURL.path
         }
         addWindowController(windowController)

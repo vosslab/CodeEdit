@@ -2,6 +2,12 @@
 
 ### Fixes and Maintenance
 
+- Fixed the merged syntax-definition package layout so SwiftPM processes only XML files from the active Kate vendor resource tree and the live highlighter loads Swift XML from that same bundle path.
+- Restored visible syntax highlighting by keeping the XML-based Kate colors applied through the final smoke view state, and restored the historical filename-based screenshot capture command.
+- Changed fresh plain-editor document windows to a 960 x 600 landscape default and made the command self-test restore the original selection instead of leaving Select All highlighted in screenshots.
+- Made the distribution-clean debug build path recreate SwiftPM's artifact directory, silence false-positive clean-script `find` output, and route `CodeEditTextView` viewport notifications through main AppKit selectors.
+- Replaced the direct SwiftPM launch entry with an AppKit application main for the plain-editor path so the smoke harness can exercise the same file-backed document window lifecycle without relying on a SwiftUI settings-only scene.
+- Restored the full package-smoke test target source set so SwiftPM includes every `CodeEditTests/PackageSmoke` test file instead of warning about unhandled tests.
 - Added a context-preserving Kate XML Swift syntax highlighter and wired it into the live plain-editor path so Swift files receive semantic color spans in `NSTextStorage`.
 - Added smoke-log validation requiring Swift comment, keyword, number, string, and type highlighting with multiple distinct readable colors in the active editor.
 - Added focused Swift Testing package tests proving Kate context handling keeps keywords inside comments and strings from being flattened into global keyword matches, empty input is safe, language mismatch falls back to plain text, and re-highlighting reflects changed text.

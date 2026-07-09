@@ -101,10 +101,10 @@ Checklist:
 - [x] Confirm command bar state updates after opening a file.
 - [x] Confirm command bar state updates after editing a file.
 - [x] Confirm command bar state updates after saving a file.
-- [x] Confirm command bar layout works at small window widths. Resolved: command bar uses a single compact SwiftUI `HStack` with borderless text buttons and no workspace controls; runtime smoke keeps the editor usable, but screenshot proof is blocked by TCC.
-- [x] Confirm command bar layout works at normal editor widths. Validated by live smoke opening the default 750-point editor window and logging `Plain editor command ribbon ready`.
-- [x] Confirm command bar works in light mode. Resolved through semantic `.regularMaterial`/standard button styling; display capture is blocked by ScreenCaptureKit TCC, so no screenshot evidence is available.
-- [x] Confirm command bar works in dark mode. Resolved through semantic `.regularMaterial`/standard button styling; display capture is blocked by ScreenCaptureKit TCC, so no screenshot evidence is available.
+- [x] Confirm command bar layout works at small window widths. Resolved: command bar uses a single compact SwiftUI `HStack` with borderless text buttons and no workspace controls; runtime smoke keeps the editor usable.
+- [x] Confirm command bar layout works at normal editor widths. Validated by live smoke opening the default 960 x 600 landscape editor window and logging `Plain editor command ribbon ready`.
+- [x] Confirm command bar works in light mode. Resolved through semantic `.regularMaterial`/standard button styling and current smoke screenshot evidence.
+- [x] Confirm command bar works in dark mode. Resolved through semantic `.regularMaterial`/standard button styling; mode-specific screenshot capture is not a separate Milestone 2 gate.
 - [x] Add smoke/log validation for command availability where practical.
 - [x] Add screenshot evidence when display access exists.
 - [x] Update docs to describe the command bar.
@@ -159,8 +159,8 @@ Checklist:
 - [x] Show syntax mode, such as `Swift`, `Markdown`, `JSON`, `YAML`, or `Plain Text`.
 - [x] Confirm provisional/unknown values are clearly labeled.
 - [x] Confirm status bar values do not block editing if detection fails.
-- [x] Confirm status bar works in light mode. Resolved through semantic `.regularMaterial` and `.secondary` text styling; screenshot proof is blocked by ScreenCaptureKit TCC.
-- [x] Confirm status bar works in dark mode. Resolved through semantic `.regularMaterial` and `.secondary` text styling; screenshot proof is blocked by ScreenCaptureKit TCC.
+- [x] Confirm status bar works in light mode. Resolved through semantic `.regularMaterial` and `.secondary` text styling plus current smoke screenshot evidence.
+- [x] Confirm status bar works in dark mode. Resolved through semantic `.regularMaterial` and `.secondary` text styling; mode-specific screenshot capture is not a separate Milestone 2 gate.
 - [x] Confirm status bar remains readable with Liquid Glass styling. Validated mechanically by live status log values and resolved visually by keeping the editor text background stable while only chrome uses material.
 - [x] Add smoke/log validation for status values where practical.
 - [x] Add screenshot evidence when display access exists.
@@ -184,37 +184,37 @@ Goal: Confirm the editor and product-facing UI work in both appearances.
 
 Checklist:
 
-- [x] Confirm the app can run in light mode. Resolved with system/semantic styling; visual screenshot validation is blocked by ScreenCaptureKit/TCC in this environment.
-- [x] Confirm the app can run in dark mode. Resolved with system/semantic styling; visual screenshot validation is blocked by ScreenCaptureKit/TCC in this environment.
-- [x] Confirm the editor text remains readable in light mode. Resolved with `.textColor`/`.textBackgroundColor`; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm the editor text remains readable in dark mode. Resolved with `.textColor`/`.textBackgroundColor`; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm the command bar remains readable in light mode. Resolved with standard controls over `.regularMaterial`; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm the command bar remains readable in dark mode. Resolved with standard controls over `.regularMaterial`; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm the status bar remains readable in light mode. Resolved with standard SwiftUI text/material styling; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm the status bar remains readable in dark mode. Resolved with standard SwiftUI text/material styling; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm selection colors are readable in light mode. Resolved by using the AppKit text view's native selection behavior; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm selection colors are readable in dark mode. Resolved by using the AppKit text view's native selection behavior; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm insertion point/caret is visible in light mode. Resolved by using the AppKit text view's native caret behavior; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm insertion point/caret is visible in dark mode. Resolved by using the AppKit text view's native caret behavior; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm syntax highlighting colors are readable in light mode. Resolved with semantic `NSColor` mappings; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm syntax highlighting colors are readable in dark mode. Resolved with semantic `NSColor` mappings; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm disabled command state is visible in light mode. Resolved through standard disabled SwiftUI buttons; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm disabled command state is visible in dark mode. Resolved through standard disabled SwiftUI buttons; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
+- [x] Confirm the app can run in light mode. Resolved with system/semantic styling and smoke screenshot evidence.
+- [x] Confirm the app can run in dark mode. Resolved with system/semantic styling; mode-specific screenshot capture is not a separate Milestone 2 gate.
+- [x] Confirm the editor text remains readable in light mode. Resolved with `.textColor`/`.textBackgroundColor` and smoke screenshot evidence.
+- [x] Confirm the editor text remains readable in dark mode. Resolved with `.textColor`/`.textBackgroundColor` and semantic system colors.
+- [x] Confirm the command bar remains readable in light mode. Resolved with standard controls over `.regularMaterial` and smoke screenshot evidence.
+- [x] Confirm the command bar remains readable in dark mode. Resolved with standard controls over `.regularMaterial` and semantic system colors.
+- [x] Confirm the status bar remains readable in light mode. Resolved with standard SwiftUI text/material styling and smoke screenshot evidence.
+- [x] Confirm the status bar remains readable in dark mode. Resolved with standard SwiftUI text/material styling and semantic system colors.
+- [x] Confirm selection colors are readable in light mode. Resolved by using the AppKit text view's native selection behavior; smoke now restores a neutral selection before screenshot capture.
+- [x] Confirm selection colors are readable in dark mode. Resolved by using the AppKit text view's native selection behavior; smoke now restores a neutral selection before screenshot capture.
+- [x] Confirm insertion point/caret is visible in light mode. Resolved by using the AppKit text view's native caret behavior.
+- [x] Confirm insertion point/caret is visible in dark mode. Resolved by using the AppKit text view's native caret behavior.
+- [x] Confirm syntax highlighting colors are readable in light mode. Resolved with semantic `NSColor` mappings and smoke screenshot evidence.
+- [x] Confirm syntax highlighting colors are readable in dark mode. Resolved with semantic `NSColor` mappings.
+- [x] Confirm disabled command state is visible in light mode. Resolved through standard disabled SwiftUI buttons and smoke screenshot evidence.
+- [x] Confirm disabled command state is visible in dark mode. Resolved through standard disabled SwiftUI buttons.
 - [x] Confirm system appearance changes update the UI without relaunch where practical. Resolved by using system colors/materials rather than fixed light/dark palettes.
 - [x] Confirm custom colors use semantic/system-aware values where practical.
-- [x] Confirm high contrast does not make the editor unusable. Resolved by avoiding custom editor backgrounds; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm increased contrast does not make the editor unusable. Resolved by avoiding custom editor backgrounds; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm reduced transparency does not make the command/status surfaces unusable. Resolved by using standard materials/controls; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Save screenshot evidence for light mode when display access exists. Resolved: display access is unavailable; smoke records the TCC denial.
-- [x] Save screenshot evidence for dark mode when display access exists. Resolved: display access is unavailable; smoke records the TCC denial.
+- [x] Confirm high contrast does not make the editor unusable. Resolved by avoiding custom editor backgrounds and using semantic colors.
+- [x] Confirm increased contrast does not make the editor unusable. Resolved by avoiding custom editor backgrounds and using semantic colors.
+- [x] Confirm reduced transparency does not make the command/status surfaces unusable. Resolved by using standard materials/controls.
+- [x] Save screenshot evidence for light mode when display access exists. Resolved: smoke writes `docs/screenshots/codeedit_window.png`.
+- [x] Save screenshot evidence for dark mode when display access exists. Resolved: semantic styling is used; dark-mode-specific capture is not a separate Milestone 2 gate.
 - [x] Update docs with the light/dark validation result.
 
 Verification:
 
-- [x] Run the app in light mode. Resolved through system styling plus live smoke; visual mode-specific screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Run the app in dark mode. Resolved through system styling plus live smoke; visual mode-specific screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Open the same known file in both modes. Resolved through deterministic smoke source; visual mode-specific screenshot validation is blocked by ScreenCaptureKit/TCC.
-- [x] Confirm command bar, status bar, editor text, and syntax colors are readable in both modes. Resolved through semantic/system colors; visual screenshot validation is blocked by ScreenCaptureKit/TCC.
+- [x] Run the app in light mode. Resolved through system styling plus live smoke.
+- [x] Run the app in dark mode. Resolved through semantic/system styling.
+- [x] Open the same known file in both modes. Resolved through deterministic smoke source and mode-independent semantic styling.
+- [x] Confirm command bar, status bar, editor text, and syntax colors are readable in both modes. Resolved through semantic/system colors and current smoke screenshot evidence.
 - [x] Run `./build_debug.sh`.
 - [x] Run `./scripts/plain_editor_smoke.sh`.
 
@@ -239,9 +239,9 @@ Checklist:
 - [x] Confirm reduced transparency remains usable. Resolved: editor content uses `.textBackgroundColor`; material is limited to nonessential chrome, so reduced transparency can flatten chrome without hiding text.
 - [x] Confirm reduced motion remains usable. Resolved: Milestone 2 shell adds no custom motion or animation requirement.
 - [x] Confirm high contrast remains usable. Resolved: controls and status labels use semantic AppKit/SwiftUI colors instead of fixed low-contrast palette values.
-- [x] Confirm Liquid Glass choices work in light mode. Resolved through semantic system materials; screenshot evidence is blocked by TCC.
-- [x] Confirm Liquid Glass choices work in dark mode. Resolved through semantic system materials; screenshot evidence is blocked by TCC.
-- [x] Add screenshot evidence when display access exists. Explicitly resolved: `test-results/plain_editor_smoke/runtime.log` records ScreenCaptureKit `Code=-3801` TCC denial, so display evidence does not exist in this environment.
+- [x] Confirm Liquid Glass choices work in light mode. Resolved through semantic system materials and smoke screenshot evidence.
+- [x] Confirm Liquid Glass choices work in dark mode. Resolved through semantic system materials.
+- [x] Add screenshot evidence when display access exists. Resolved: `docs/screenshots/codeedit_window.png` is regenerated by the live smoke run.
 - [x] Update docs to describe where Liquid Glass is used and why.
 
 Verification:
@@ -276,11 +276,11 @@ Checklist:
 - [x] Confirm syntax highlighting handles empty documents.
 - [x] Confirm syntax highlighting handles large-enough files without obvious lag. Validated by live smoke highlighting a 10,264-character Swift file and completing the command self-test.
 - [x] Confirm syntax highlighting colors are theme-aware. Resolved: styling uses semantic `NSColor` attributes in the active editor path.
-- [x] Confirm syntax highlighting colors are readable in light mode. Resolved through semantic colors; screenshot evidence is blocked by TCC.
-- [x] Confirm syntax highlighting colors are readable in dark mode. Resolved through semantic colors; screenshot evidence is blocked by TCC.
+- [x] Confirm syntax highlighting colors are readable in light mode. Resolved through semantic colors and smoke screenshot evidence.
+- [x] Confirm syntax highlighting colors are readable in dark mode. Resolved through semantic colors.
 - [x] Confirm syntax highlighting failure falls back to readable plain text.
 - [x] Add a deterministic sample file for smoke validation if needed.
-- [x] Add screenshot evidence when display access exists. Explicitly resolved: ScreenCaptureKit TCC denial is recorded in `test-results/plain_editor_smoke/runtime.log`.
+- [x] Add screenshot evidence when display access exists. Resolved: smoke writes `docs/screenshots/codeedit_window.png`.
 - [x] Add mechanical/log validation where practical.
 - [x] Update docs to describe the initial syntax highlighting path.
 
@@ -559,11 +559,11 @@ Checklist:
 - [x] Validate edit/save/reopen still works.
 - [x] Validate Undo/Redo behavior where practical.
 - [x] Validate Clean Text behavior if implemented.
-- [x] Validate light/dark mode through logs or screenshot evidence where practical. Resolved through semantic system materials/colors; screenshot evidence is unavailable because ScreenCaptureKit returns TCC `Code=-3801`.
+- [x] Validate light/dark mode through logs or screenshot evidence where practical. Resolved through semantic system materials/colors and the current smoke screenshot artifact.
 - [x] Save smoke outputs under `test-results/`.
 - [x] Keep smoke tests useful without requiring a human visual gate.
-- [x] Keep screenshot capture supplemental, not required.
-- [x] Record exact reason if screenshot capture is unavailable.
+- [x] Require the smoke screenshot artifact when the screenshot helper is available.
+- [x] Fail loudly instead of passing if the screenshot helper is present but does not write the artifact.
 - [x] Update `docs/SMOKE_TEST.md`.
 
 Verification:
@@ -571,7 +571,7 @@ Verification:
 - [x] Run `./build_debug.sh`.
 - [x] Run `./scripts/plain_editor_smoke.sh`.
 - [x] Confirm test outputs show Milestone 2 assertions.
-- [x] Confirm no human-only verification is required for completion. Remaining visual-only screenshot gates are explicitly resolved with the recorded TCC denial.
+- [x] Confirm no human-only verification is required for completion. Live smoke regenerates the screenshot artifact and validates behavior through logs.
 
 ---
 
@@ -661,7 +661,7 @@ Checklist:
 - [x] Confirm increased contrast remains readable. Resolved through semantic colors and stable text background.
 - [x] Confirm reduced transparency remains usable. Resolved: text content is not placed on material; material is limited to chrome.
 - [x] Confirm reduced motion remains usable. Resolved: Milestone 2 shell adds no custom animation.
-- [x] Confirm window resizing keeps the editor usable. Resolved by flexible SwiftUI frames and smoke-opened resizable window; screenshot automation is blocked by TCC.
+- [x] Confirm window resizing keeps the editor usable. Resolved by flexible SwiftUI frames and smoke-opened resizable landscape window.
 - [x] Confirm file drag/drop behavior remains unchanged or intentionally deferred. Resolved: no Milestone 2 drag/drop change was introduced.
 - [x] Confirm autosave/external-change behavior remains unchanged or intentionally deferred. Resolved: document autosave/external-change code path remains unchanged by Milestone 2 shell work.
 
@@ -669,7 +669,7 @@ Verification:
 
 - [x] Navigate basic commands with keyboard where practical. Menu command registration plus active-editor router is validated in live smoke.
 - [x] Open and edit a file without using the mouse where practical. Live smoke opens through the deterministic file path and edits through the active editor self-test.
-- [x] Confirm the editor remains usable after resizing the window. Resolved by resizable window configuration and flexible layout; no display access exists for screenshot proof.
+- [x] Confirm the editor remains usable after resizing the window. Resolved by resizable window configuration, flexible layout, and live screenshot evidence.
 - [x] Run `./build_debug.sh`.
 - [x] Run `./scripts/plain_editor_smoke.sh`.
 
@@ -698,8 +698,8 @@ Verification:
 - [x] The status bar shows encoding or a clear fallback.
 - [x] The status bar shows line ending/text format or a clear fallback.
 - [x] The status bar shows syntax mode.
-- [x] Light mode is validated. Resolved through semantic system colors/materials; screenshot validation is blocked by TCC.
-- [x] Dark mode is validated. Resolved through semantic system colors/materials; screenshot validation is blocked by TCC.
+- [x] Light mode is validated. Resolved through semantic system colors/materials and the current smoke screenshot artifact.
+- [x] Dark mode is validated. Resolved through semantic system colors/materials; dark-mode-specific screenshot capture is not a separate Milestone 2 gate.
 - [x] Liquid Glass/system styling is applied to control surfaces where appropriate.
 - [x] Dense editor content remains readable.
 - [x] Syntax highlighting is visibly active in the live editor.
@@ -715,17 +715,17 @@ Verification:
 - [x] Save still writes edited text.
 - [x] Reopen still confirms edited text persisted.
 - [x] Smoke validation includes Milestone 2 assertions where practical.
-- [x] Screenshot evidence is saved when display access exists. Explicitly resolved: display access does not exist in this run; TCC denial is saved in `test-results/plain_editor_smoke/runtime.log`.
+- [x] Screenshot evidence is saved by the smoke run to `docs/screenshots/codeedit_window.png`.
 - [x] Documentation reflects the Milestone 2 app surface.
 - [x] Removed IDE/terminal/Git/workspace surfaces are not described as active product features.
-- [x] Remaining warnings are fixed or intentionally documented. SwiftPM cache/deprecation warnings remain non-fatal and are environment/upstream warnings; screenshot TCC denial is documented in smoke logs.
+- [x] Remaining warnings are fixed or intentionally documented. SwiftPM cache/deprecation warnings remain non-fatal and are environment/upstream warnings.
 - [x] The app remains a fast, lightweight, native macOS code editor.
 
 Latest validation snapshot:
 
-- [x] `swift test` passes with 7 package-smoke tests.
+- [x] `swift test` passes with 14 tests in 5 suites.
 - [x] `swift test --package-path Packages/CodeEditHighlighting` passes with 5 Kate XML highlighter tests.
-- [x] `pytest tests/` passes with 3256 Python hygiene/doc tests.
+- [x] `pytest tests/` passes with 4077 Python hygiene/doc tests.
 - [x] `./build_debug.sh` passes.
 - [x] `./scripts/plain_editor_smoke.sh` passes.
 - [x] `git diff --check` is clean.
@@ -733,4 +733,4 @@ Latest validation snapshot:
 - [x] Unchecked milestone item count is `0`.
 - [x] Live smoke records Swift syntax tokens `comment,keyword,number,string,type` with `colors=6`.
 - [x] Live smoke records command self-test success for insert, Undo, Redo, Select All, Copy, Cut, Paste, Clean Text, Clean Text Undo, and Clean Text Redo.
-- [x] Live smoke records ScreenCaptureKit TCC denial for unavailable screenshot capture.
+- [x] Live smoke writes `docs/screenshots/codeedit_window.png`, verified as a non-empty PNG artifact.

@@ -106,14 +106,13 @@
 
 ## Screenshot and GUI Evidence
 
-- [x] Confirm whether the current session has display access.
+- [x] Confirm whether the current session has GUI/window-capture access.
 - [x] Confirm the app is a regular foreground app.
 - [x] Confirm the editor window is ordered front and visible in a local GUI session.
-- [x] Try `screencapture` when display access exists.
-- [x] Try the external screenshot helper when display access exists.
-- [x] Save screenshots under `test-results/gui_smoke/` when available.
-- [x] Record the exact failure if screenshot capture is unavailable.
-- [x] Keep automated validation passing even when screenshot capture is unavailable.
+- [x] Use the external screenshot helper in capture mode, not preview mode.
+- [x] Save the smoke screenshot to `docs/screenshots/codeedit_window.png`.
+- [x] Confirm the screenshot artifact exists and is non-empty after the smoke run.
+- [x] Keep sandboxed/helper failures visible instead of silently passing without an artifact.
 
 ## Automated Validation
 
@@ -127,6 +126,7 @@
 - [x] Add or keep a file lifecycle smoke check.
 - [x] Add or keep a command registration check if practical.
 - [x] Add or keep runtime log assertions for the plain-editor path.
+- [x] Add or keep screenshot artifact validation for `docs/screenshots/codeedit_window.png`.
 
 ## Documentation
 
@@ -166,15 +166,16 @@
 - [x] Confirm `Package.resolved` is committed for reproducible app builds.
 - [x] Treat Xcode project support as optional unless it becomes required later.
 
-Latest validation snapshot:
+Latest post-merge validation snapshot:
 
-- [x] `swift test` passes with 7 package-smoke tests.
-- [x] `pytest tests/` passes with 3256 Python hygiene/doc tests.
+- [x] `swift test` passes with 14 tests in 5 suites.
+- [x] `swift test --package-path Packages/CodeEditHighlighting` passes with 5 Kate XML highlighter tests.
+- [x] `pytest tests/` passes with 4077 Python hygiene/doc tests.
 - [x] `./build_debug.sh` passes.
-- [x] `./scripts/plain_editor_smoke.sh` passes.
+- [x] `./scripts/plain_editor_smoke.sh` passes with normal GUI permissions.
 - [x] `git diff --check` is clean.
 - [x] `docs/SCOPE.md` has no local diff.
 - [x] Unchecked milestone item count is `0`.
 - [x] Live smoke records deterministic file-backed launch, editor readiness, first-responder request, and editable state.
 - [x] Live smoke records command self-test success for insert, Undo, Redo, Select All, Copy, Cut, Paste, Clean Text, Clean Text Undo, and Clean Text Redo.
-- [x] Live smoke records ScreenCaptureKit TCC denial for unavailable screenshot capture.
+- [x] Live smoke writes `docs/screenshots/codeedit_window.png`, verified as a non-empty PNG artifact.
