@@ -3,7 +3,12 @@ import CodeEditTextView
 import SwiftUI
 import UniformTypeIdentifiers
 
-@main
+// The @main entry point moved to CodeEdit/App/SwiftlyCodeEditApp.swift (WP-S1): the
+// SwiftUI App is now the single entry, and this AppKit enum shell is unreachable
+// dead code kept only until WP-S4 deletes it. Its static launchStartNanoseconds and
+// logLaunchToWindowIfNeeded members stay live: the document window bridge still uses
+// them to report LAUNCH_TO_WINDOW_MS, and killAfterSeconds parses the --kill-after
+// flag for the new shell's backstop.
 @MainActor
 enum CodeEditMain {
     // Captured on first access, which main() forces as its very first statement,

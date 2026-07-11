@@ -188,3 +188,61 @@ all gates and no state-preservation red flags.
   against the new SDK. If all four gates pass with margin and cursor, selection,
   and scroll are preserved across a programmatic attribute apply, adopt outcome
   1 and retire the adapter.
+
+## Re-validation 2026-07-09
+
+WP-S0c re-ran the four WP-S0b editor gates against the same SwiftUI
+`TextEditor(text:selection:)` + `AttributedString` design on the current
+toolchain. This re-run landed on an identical toolchain to the original spike
+(same Swift, macOS, and hardware), so it re-validates the verdict on the machine
+of record rather than on a newer SDK.
+
+Environment:
+
+- macOS 26.5.2 (build 25F84)
+- Swift 6.3.3 (swiftlang-6.3.3.1.3 clang-2100.1.1.101), `arm64-apple-macosx26.0`
+- hw.model MacBookPro18,3
+
+Method: a throwaway SwiftPM app (outside the repo tree, at
+`/private/tmp/claude-501/wp-s0c-prototype/`) mounts a single rich-text
+`TextEditor` bound to an `@Observable` model's `AttributedString` and
+`AttributedTextSelection` in a monospaced font, generates the fixtures at runtime
+from tiled Swift-like source (small 14,003 chars; large 1,060,688 chars), and
+drives four gates programmatically: keystroke p95 across 200 mid-document
+inserts, a full 154-run foreground-color span apply, cursor-offset preservation
+across both a batched whole-document reassignment and a single in-place subrange
+edit, and a 1 MB mount watched by a background thread. Fresh numbers were stable
+across three runs (keystroke p95 494 to 513 ms; span apply 232 to 241 ms). The
+small fixture is synthetic tiled source (14,003 characters), not the original
+spike's real repo file `CodeFileDocument.swift` (13,919 characters).
+
+This re-run carries over three of the original four judged gates (keystroke
+p95, span apply, cursor preserved) and drops `scroll_preserved`, which passed in
+the original spike and was not re-tested this round. In its place, the fourth
+row below formalizes the original's informal 25 s large-mount watchdog
+observation into a scored gate with a 5 s threshold; the original spike never
+scored a pass/fail line for the large mount, only the watchdog log quoted
+above.
+
+| Gate | Original (WP-S0b) | Fresh (WP-S0c) | Pass/Fail |
+| --- | --- | --- | --- |
+| keystroke p95 < 16 ms | 140.56 ms | 513.30 ms | FAIL |
+| span apply < 50 ms | 159.07 ms | 237.38 ms | FAIL |
+| cursor preserved | false (7059 -> 14119) | false (7001 -> 14003) | FAIL |
+| large (~1 MB) mounts < 5 s (formalized; informal 25 s wedge observation originally) | never mounted (wedged) | never mounted (wedged) | FAIL |
+
+Verdict: FAIL confirmed - TextKit adapter stands.
+
+The three carried-over gates (keystroke p95, span apply, cursor preserved) fail
+again with worse numbers than the original, and the newly formalized large-mount
+gate also fails; the caret still collapses to end-of-document on both a batched
+and an in-place attribute write, and the 1 MB document still wedges the main
+thread past the 5 s window. The keystroke and span numbers are worse than the
+original, not better, so there is no signal that the SwiftUI-native interior has
+become viable. `scroll_preserved`, which passed originally, was not re-tested
+this round. The replaceable AppKit TextKit adapter remains the editor engine.
+
+Re-evaluation trigger: the next macOS SDK after 26.5.2. Re-run this prototype on
+the new SDK; adopt outcome 1 and retire the adapter only if all four gates pass
+with margin and cursor, selection, and scroll survive a programmatic attribute
+apply.

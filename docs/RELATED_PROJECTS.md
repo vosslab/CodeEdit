@@ -30,14 +30,14 @@ Current milestone: lightweight macOS text editor with syntax highlighting, not a
   use tree-sitter parser packages); the current syntax-highlighting path is the Kate XML pipeline
   in `CodeEditSyntaxDefinitions` and `CodeEditHighlighting` instead.
 
-### CodeEditSourceEditor
-- Relationship: vendored find-panel harvest source, deletion planned
-- Link: https://github.com/CodeEditApp/CodeEditSourceEditor
-- Evidence: present under `Packages/CodeEditSourceEditor/` and in `OTHER_REPOS/repos.txt` as a
-  reference clone, but not declared as a dependency in `Package.swift`; kept only so its
-  find-and-replace panel implementation can be harvested before the package is deleted.
-- Notes: heavier, tree-sitter-based editor facade than the current plain-editor milestone needs;
-  do not treat it as a live build dependency.
+### CodeEditSourceEditor (harvested and deleted)
+- Was previously listed in this doc as a vendored find-panel harvest source, never declared as a
+  dependency in `Package.swift`. WP-F1 patch 18 ported its find-and-replace panel behavior into
+  `CodeEdit/Features/Find/`; patch 19 then deleted the 199-file vendored copy under
+  `Packages/CodeEditSourceEditor/` (`git rm -r Packages/CodeEditSourceEditor`), its harvest purpose
+  fulfilled. No longer present in this repo's tree; a reference clone remains at
+  `OTHER_REPOS/CodeEditSourceEditor/` per `OTHER_REPOS/repos.txt`. Upstream:
+  https://github.com/CodeEditApp/CodeEditSourceEditor
 
 ### KDE syntax-highlighting (KSyntaxHighlighting)
 - Relationship: format source for syntax-definition data (not a code dependency)
@@ -126,8 +126,8 @@ Current milestone: lightweight macOS text editor with syntax highlighting, not a
 Confirmed entries come primarily from `Package.swift` (the four live SwiftPM path dependencies:
 CodeEditHighlighting, CodeEditLanguages, CodeEditTextView, CodeEditSyntaxDefinitions), the
 vendoring commit `a61afbd`, and the vendored packages' own README files that still link back to
-`github.com/CodeEditApp/...`. `CodeEditSourceEditor` is vendored but not wired as a dependency,
-matching its "harvest source, deletion planned" status. `CodeEditHighlighting` and
+`github.com/CodeEditApp/...`. `CodeEditSourceEditor` was vendored but never wired as a dependency;
+WP-F1 patch 19 deleted it from the tree once its find-panel harvest was complete. `CodeEditHighlighting` and
 `CodeEditSyntaxDefinitions` carry no CodeEditApp upstream link in their own manifests; their
 relevant upstream is the KDE `syntax-highlighting` (KSyntaxHighlighting) project, whose XML schema
 their bundled `.xml` definition files and Swift interpreter target. `OTHER_REPOS/repos.txt` is the

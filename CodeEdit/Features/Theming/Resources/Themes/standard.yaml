@@ -1,0 +1,46 @@
+# SwiftlyCodeEdit bundled default theme (WP-F2 Patch A/B).
+#
+# Colors are the exact sRGB values NSColor's dynamic system colors resolved
+# to under NSAppearance .aqua (light) and .darkAqua (dark) prior to the
+# WP-F2 cutover, so this theme reproduces the previous hardcoded
+# `PlainSyntaxTheme.standard` palette unchanged. See docs/THEME_FORMAT.md
+# for the schema this file follows.
+version: 1
+name: standard
+variants:
+  light:
+    base_text: "#000000"
+    background: "#FFFFFF"
+    comment: "#34C759"
+    string: "#FF383C"
+    keyword: "#0088FF"
+    number: "#CB30E0"
+    function: "#FF8D28"
+    type: "#00C3D0"
+    operator: "#0000007F"
+    markup: "#FF2D55"
+    plain_text: "#000000"
+    style_imports: "#00C3D0"
+    style_variable: "#000000"
+    style_data_type: "#00C3D0"
+    style_function: "#FF8D28"
+    style_annotation: "#CB30E0"
+    style_string_interpolation: "#FF8D28"
+  dark:
+    base_text: "#FFFFFF"
+    background: "#1E1E1E"
+    comment: "#30D158"
+    string: "#FF4245"
+    keyword: "#0091FF"
+    number: "#DB34F2"
+    function: "#FF9230"
+    type: "#00D2E0"
+    operator: "#FFFFFF8C"
+    markup: "#FF375F"
+    plain_text: "#FFFFFF"
+    style_imports: "#00D2E0"
+    style_variable: "#FFFFFF"
+    style_data_type: "#00D2E0"
+    style_function: "#FF9230"
+    style_annotation: "#DB34F2"
+    style_string_interpolation: "#FF9230"

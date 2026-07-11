@@ -55,6 +55,28 @@ final class CodeFileDocument: NSDocument, ObservableObject {
     /// Used to override detected languages.
     @Published var language: CodeLanguage?
 
+    /// A pending external-change conflict the editor window surfaces to the user.
+    /// `CodeFileView` observes this (the document is an `ObservableObject`) and
+    /// presents a SwiftUI alert while it is non-nil. It is set by
+    /// ``presentedItemDidChange()`` for the three matrix rows that need the user's
+    /// attention -- a dirty document whose file changed on disk (keep-mine vs
+    /// reload), an undecodable external change, and a deleted or moved file -- and
+    /// cleared when the user resolves or dismisses it. A clean, decodable external
+    /// change reloads silently and never sets this. See the external-change matrix
+    /// in docs/active_plans/decisions/document_architecture_decision.md (WP-L2).
+    @Published var pendingExternalChange: ExternalChangePrompt?
+
+    /// The external-change situations the editor asks the user about. The clean +
+    /// decodable case is intentionally absent: it reloads silently.
+    enum ExternalChangePrompt: Sendable, Equatable {
+        /// Dirty document, decodable change on disk: keep my edits, or reload.
+        case reloadConflict
+        /// The on-disk bytes no longer decode: error alert, buffer untouched.
+        case undecodable
+        /// The backing file was deleted or moved: alert, document needs Save As.
+        case fileDeleted
+    }
+
     /// The type of data this file document contains.
     ///
     /// If its text content is not nil, a `text` UTType is returned.
@@ -78,6 +100,81 @@ final class CodeFileDocument: NSDocument, ObservableObject {
     /// Timer used to schedule autosave intervals.
     private var autosaveTimer: Timer?
 
+    // MARK: - Text change tracking
+
+    /// How a text mutation reached ``content``, so the document maps each to the
+    /// matching `NSDocument` change-count transition. Forward edits dirty the
+    /// document; an undo steps the change count back toward the saved state; a redo
+    /// steps it away again. This is the distinction today's code missed by calling
+    /// `.changeDone` unconditionally on every text change (document state contract,
+    /// dirty flag semantics).
+    enum EditKind: Sendable {
+        case edit
+        case undo
+        case redo
+    }
+
+    /// The two-case edited-range change payload broadcast on every text change, so a
+    /// consumer can bound its work to the edited region instead of rescanning the
+    /// whole document. The case is explicit -- a consumer never infers it from range
+    /// heuristics -- so the bounded rehighlighter and the incremental status bar each
+    /// handle exactly two shapes. `Sendable` per the Resolved decisions state model.
+    enum EditedTextChange: Sendable, Equatable {
+        /// A bounded edit: the characters in `replacedRange` (pre-edit character
+        /// coordinates) became `newLength` characters. Covers typing, paste, undo,
+        /// redo, and find-replace.
+        case range(replacedRange: NSRange, newLength: Int)
+        /// The whole buffer was replaced out-of-band by a direct storage mutation
+        /// (external reload; any future direct-storage write); a consumer rescans
+        /// the entire document. Clean Text is not a producer -- it edits through
+        /// the normal replaceCharacters path and so broadcasts a full-buffer range.
+        case fullInvalidation
+    }
+
+    /// Handlers notified with the two-case ``EditedTextChange`` on every text change.
+    /// The bounded rehighlighter and incremental status bar (M8) subscribe here rather
+    /// than observing raw `NSTextStorage` edits, so they receive the explicit case.
+    /// Edit consumers drive main-actor UI, so handlers are main-actor isolated.
+    private var editObservers: [@MainActor (EditedTextChange) -> Void] = []
+
+    /// Subscribes `handler` to this document's edited-range change notifications.
+    @MainActor
+    func addEditObserver(_ handler: @escaping @MainActor (EditedTextChange) -> Void) {
+        editObservers.append(handler)
+    }
+
+    /// Delivers an edited-range change to every subscribed observer.
+    @MainActor
+    private func broadcast(_ change: EditedTextChange) {
+        for handler in editObservers {
+            handler(change)
+        }
+    }
+
+    /// Records a mutation the editor made to ``content`` and updates the dirty flag.
+    ///
+    /// Views report edits here instead of calling ``updateChangeCount`` directly, so
+    /// the document -- not the view -- owns change tracking (document state contract).
+    /// An undo back to the saved text clears ``isDocumentEdited``; a redo away from it
+    /// sets the flag again. Also broadcasts the bounded ``EditedTextChange/range(replacedRange:newLength:)``
+    /// so range-bounded consumers can rehighlight or restat just the edited region.
+    /// - Parameters:
+    ///   - kind: How the mutation reached the buffer (forward edit, undo, or redo).
+    ///   - replacedRange: The pre-edit character range that was replaced.
+    ///   - newLength: The character length of the replacement text.
+    @MainActor
+    func recordEdit(_ kind: EditKind, replacedRange: NSRange, newLength: Int) {
+        switch kind {
+        case .edit:
+            updateChangeCount(.changeDone)
+        case .undo:
+            updateChangeCount(.changeUndone)
+        case .redo:
+            updateChangeCount(.changeRedone)
+        }
+        broadcast(.range(replacedRange: replacedRange, newLength: newLength))
+    }
+
     // MARK: - NSDocument
 
     override static var autosavesInPlace: Bool {
@@ -90,39 +187,11 @@ final class CodeFileDocument: NSDocument, ObservableObject {
 
     @MainActor
     override func makeWindowControllers() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 960, height: 600),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-            backing: .buffered, defer: false
-        )
-        let windowController = NSWindowController(window: window)
-        if let fileURL {
-            windowController.shouldCascadeWindows = false
-            if ProcessInfo.processInfo.environment["CODEEDIT_PLAIN_EDITOR_COMMAND_SELF_TEST"] == "1" {
-                UserDefaults.standard.removeObject(forKey: "NSWindow Frame \(fileURL.path)")
-            }
-            windowController.windowFrameAutosaveName = fileURL.path
-        }
-        addWindowController(windowController)
-        windowController.showWindow(nil)
-
-        if let fileURL {
-            window.title = fileURL.lastPathComponent
-        }
-        window.contentView = NSHostingView(rootView: WindowCodeFileView(codeFile: self))
-        #if DEBUG
-        debugRuntimeLog("Created editor window for \(self.fileURL?.path ?? "<unknown>")")
-        #endif
-
-        window.makeKeyAndOrderFront(nil)
-        window.orderFrontRegardless()
-        // Fires on the first document window only; must run before highlighting
-        // (WP-Q0 made the first highlight async) so the marker reflects launch-to-paint.
-        CodeEditMain.logLaunchToWindowIfNeeded()
-
-        if let fileURL, UserDefaults.standard.object(forKey: "NSWindow Frame \(fileURL.path)") == nil {
-            window.center()
-        }
+        // Window construction (NSWindow, NSWindowController, NSHostingController) is
+        // owned by the single sanctioned document-layer bridge so this file stays the
+        // document model. See CodeFileDocumentBridge.swift and
+        // docs/active_plans/decisions/document_architecture_decision.md.
+        CodeFileWindowBridge.installWindowController(for: self)
     }
 
     // MARK: - Data
@@ -166,11 +235,21 @@ final class CodeFileDocument: NSDocument, ObservableObject {
                 // so a presentedItemDidChange reload stays highlighted.
                 content.mutableString.setString(decoded.text)
                 PlainSyntaxHighlighter.highlight(storage: content, language: getLanguage())
+                // A reload replaced the whole buffer without going through the editor's
+                // per-mutation edit path, so consumers rescan the entire document. This
+                // is the full-invalidation case of the edited-range contract (reload only;
+                // Clean Text edits through replaceCharacters), distinct from a range edit.
+                broadcast(.fullInvalidation)
+                #if DEBUG
+                // Emitted after the storage swap and the full-invalidation broadcast so
+                // an unattended e2e can await reload completion instead of polling.
+                debugRuntimeLog("RELOAD_COMPLETE path: \(self.fileURL?.path ?? "<unknown>")")
+                #endif
             } else {
                 self.content = NSTextStorage(string: decoded.text)
             }
             #if DEBUG
-            debugRuntimeLog("Loaded file: \(self.fileURL?.path ?? "<unknown>") characters: \(self.content?.length ?? 0)")
+            Self.logLoadedFile(self)
             #endif
             NotificationCenter.default.post(name: Self.didOpenNotification, object: self)
         }
@@ -193,7 +272,7 @@ final class CodeFileDocument: NSDocument, ObservableObject {
     /// fallback also covers ISO Latin-1 text because bytes 0xA0-0xFF are identical in both. Bytes
     /// undefined in Windows-1252 (0x81, 0x8D, 0x8F, 0x90, 0x9D) fail every path deliberately, so a
     /// genuinely undecodable file returns `nil` and the caller raises the decode error.
-    private nonisolated static func decode(data: Data) -> (text: String, encoding: FileEncoding)? {
+    nonisolated private static func decode(data: Data) -> (text: String, encoding: FileEncoding)? {
         if let utf16Encoding = plausibleBomlessUTF16Encoding(in: data),
            let text = String(data: data, encoding: utf16Encoding) {
             let fileEncoding: FileEncoding = utf16Encoding == .utf16LittleEndian ? .utf16LE : .utf16BE
@@ -233,7 +312,7 @@ final class CodeFileDocument: NSDocument, ObservableObject {
     ///
     /// Files that already carry a recognized byte-order mark are excluded up front, since
     /// Foundation's `NSString` heuristic already decodes BOM'd UTF-16 (and UTF-8, UTF-32) correctly.
-    private nonisolated static func plausibleBomlessUTF16Encoding(in data: Data) -> String.Encoding? {
+    nonisolated private static func plausibleBomlessUTF16Encoding(in data: Data) -> String.Encoding? {
         let byteOrderMarks: [[UInt8]] = [
             [0xEF, 0xBB, 0xBF], // UTF-8 BOM
             [0xFF, 0xFE, 0x00, 0x00], // UTF-32LE BOM (checked before the shorter UTF-16LE BOM below)
@@ -277,7 +356,7 @@ final class CodeFileDocument: NSDocument, ObservableObject {
 
     /// A byte plausible as the non-zero half of an ASCII-range UTF-16 code unit: printable ASCII,
     /// plus tab, newline, and carriage return.
-    private nonisolated static func isPlausibleAsciiTextByte(_ byte: UInt8) -> Bool {
+    nonisolated private static func isPlausibleAsciiTextByte(_ byte: UInt8) -> Bool {
         switch byte {
         case 0x09, 0x0A, 0x0D, 0x20...0x7E:
             return true
@@ -315,38 +394,213 @@ final class CodeFileDocument: NSDocument, ObservableObject {
 
     // MARK: - External Changes
 
+    /// The result of probing the represented file's current on-disk state. Kept
+    /// distinct from a bare `Date?` so a stat failure (`unreadable`) no longer
+    /// collapses into the same `nil` a genuine "file is gone" (`missing`) or a
+    /// present mtime would produce -- the old `getModificationDate()` returned
+    /// `nil` for all three, so a transient stat failure masqueraded as "no change."
+    private enum FileModificationProbe {
+        /// The file exists and here is its current modification date.
+        case date(Date)
+        /// The file no longer exists at `fileURL` (deleted or moved).
+        case missing
+        /// The file could not be stat'd for a reason other than absence.
+        case unreadable
+    }
+
     /// Handle the notification that the represented file item changed.
     ///
-    /// We check if a file has been modified and can be read again to display to the user.
-    /// To determine if a file has changed, we check the modification date. If it's different from the stored one,
-    /// we continue.
-    /// To determine if we can reload the file, we check if the document has outstanding edits. If not, we reload the
-    /// file.
+    /// Routes to the five-case external-change matrix (WP-L2). The mtime probe is
+    /// read off the main actor; every decision, buffer read, and state change runs
+    /// on the main actor so AppKit document state stays isolated correctly.
     override func presentedItemDidChange() {
-        let currentModificationDate = getModificationDate()
-
         Task { @MainActor [weak self] in
-            guard let self else { return }
-            if fileModificationDate != currentModificationDate {
-                guard isDocumentEdited else {
-                    fileModificationDate = currentModificationDate
-                    if let fileURL, let fileType {
-                        // Reload on the main actor so we keep AppKit state isolated correctly.
-                        try? self.read(from: fileURL, ofType: fileType)
-                    }
-                    return
-                }
-            }
+            self?.handlePresentedItemChange()
         }
     }
 
-    /// Helper to find the last modified date of the represented file item.
-    /// 
-    /// Different from `NSDocument.fileModificationDate`. This returns the *current* modification date, whereas the
-    /// alternative stores the date that existed when we last read the file.
-    nonisolated private func getModificationDate() -> Date? {
-        guard let path = fileURL?.path else { return nil }
-        return try? FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date
+    /// The represented file was deleted or moved out from under an open document.
+    /// NSFilePresenter delivers this on its own path (not `presentedItemDidChange`,
+    /// whose mtime probe needs the file to still exist), so the deleted/moved
+    /// matrix row is handled here as well.
+    override func accommodatePresentedItemDeletion(completionHandler: @escaping (Error?) -> Void) {
+        Task { @MainActor [weak self] in
+            self?.handleFileDeletedOrMoved()
+        }
+        completionHandler(nil)
+    }
+
+    /// Dispatches an external change to the matrix row it belongs to.
+    @MainActor
+    private func handlePresentedItemChange() {
+        switch probeModificationDate() {
+        case .missing:
+            // File deleted or moved: alert, needs Save As, edits kept.
+            handleFileDeletedOrMoved()
+        case .unreadable:
+            // Could not stat for a reason other than deletion. Do not treat this
+            // as "no change" and do not advance the date; wait for a later,
+            // readable notification rather than acting on an unknown state.
+            #if DEBUG
+            debugRuntimeLog("EXTERNAL_CHANGE probe=unreadable path: \(fileURL?.path ?? "<unknown>")")
+            #endif
+        case .date(let currentModificationDate):
+            guard fileModificationDate != currentModificationDate else { return }
+            handleExternalContentChange(currentModificationDate: currentModificationDate)
+        }
+    }
+
+    /// Applies the four content-change rows (clean/dirty crossed with
+    /// decodable/undecodable) for a file that still exists but changed on disk.
+    @MainActor
+    private func handleExternalContentChange(currentModificationDate: Date) {
+        guard let fileURL, let fileType else { return }
+
+        if isDocumentEdited {
+            // Dirty document: never overwrite the buffer without the user's
+            // choice. Classify the external bytes first, without mutating content.
+            let externalIsDecodable = (try? Data(contentsOf: fileURL))
+                .map { Self.decode(data: $0) != nil } ?? false
+            if externalIsDecodable {
+                // Dirty + decodable: acknowledge we have observed this on-disk
+                // version (so the same change is not re-prompted) and ask the user
+                // to keep their edits or reload. The buffer is untouched until then.
+                fileModificationDate = currentModificationDate
+                surfaceReloadConflict()
+            } else {
+                // Dirty + undecodable: error alert, edits kept, date not advanced.
+                surfaceExternalChangeAlert(.undecodable)
+            }
+            return
+        }
+
+        // Clean document. A decode failure must never advance the modification date
+        // behind stale text (audit F3): classify the external bytes before touching
+        // the buffer, so only a decodable change reloads and only then is the date
+        // advanced to acknowledge the buffer now matches disk.
+        let externalIsDecodable = (try? Data(contentsOf: fileURL))
+            .map { Self.decode(data: $0) != nil } ?? false
+        guard externalIsDecodable else {
+            // Clean + undecodable: error alert, buffer untouched, date not advanced.
+            // The document must not claim to be caught up with disk behind content
+            // it could not load.
+            surfaceExternalChangeAlert(.undecodable)
+            return
+        }
+
+        // Clean + decodable: silently reload the new content into the shared storage.
+        // The reload replaces the whole buffer and broadcasts .fullInvalidation, which
+        // the editor observes to refresh the encoding label (audit F7) and to reset the
+        // now-stale undo stack (audit F4). Killing the old `try?` swallow, the read error
+        // is surfaced rather than hidden, extending the WP-V3 "always real text or an
+        // explicit error, never a silent blank" contract to the reload path. The date
+        // advances only after the reload actually succeeds.
+        do {
+            try self.read(from: fileURL, ofType: fileType)
+            fileModificationDate = currentModificationDate
+        } catch {
+            // The pre-check decoded these bytes, so a throw here is unexpected. Surface
+            // it instead of swallowing it; read(from:ofType:) throws before mutating the
+            // buffer, so the in-memory document is left untouched and the date unmoved.
+            surfaceExternalChangeAlert(.undecodable)
+        }
+    }
+
+    /// Surfaces the keep-mine-or-reload conflict. Under the DEBUG auto-answer
+    /// launch argument it resolves immediately so an e2e run is unattended;
+    /// otherwise it sets observable state the editor window renders as an alert.
+    @MainActor
+    private func surfaceReloadConflict() {
+        #if DEBUG
+        debugRuntimeLog("EXTERNAL_CHANGE_PROMPT kind=reloadConflict")
+        if let choice = PlainEditorConflictAutoChoice.requested() {
+            resolveExternalChangeConflict(reloadFromDisk: choice == .reload)
+            return
+        }
+        #endif
+        pendingExternalChange = .reloadConflict
+    }
+
+    /// Surfaces a single-button external-change alert (undecodable content or a
+    /// deleted/moved file) as observable state the editor window renders.
+    @MainActor
+    private func surfaceExternalChangeAlert(_ prompt: ExternalChangePrompt) {
+        #if DEBUG
+        debugRuntimeLog("EXTERNAL_CHANGE_PROMPT kind=\(prompt)")
+        #endif
+        pendingExternalChange = prompt
+    }
+
+    /// The backing file was deleted or moved. Clear the file association so a
+    /// later Save routes through Save As instead of writing to a path that no
+    /// longer exists, keep the buffer, and mark it dirty so the window title
+    /// reflects the unsaved state. Guarded so a notification storm surfaces once.
+    @MainActor
+    private func handleFileDeletedOrMoved() {
+        guard fileURL != nil else { return }
+        fileURL = nil
+        updateChangeCount(.changeDone)
+        surfaceExternalChangeAlert(.fileDeleted)
+    }
+
+    /// Resolves a keep-mine-or-reload conflict from the alert (or the DEBUG
+    /// auto-answer seam). Keeping edits leaves the dirty buffer as-is; reloading
+    /// replaces it with the on-disk text and clears the dirty flag, since the
+    /// buffer once again matches saved state.
+    @MainActor
+    func resolveExternalChangeConflict(reloadFromDisk: Bool) {
+        pendingExternalChange = nil
+        guard reloadFromDisk else {
+            #if DEBUG
+            debugRuntimeLog("EXTERNAL_CHANGE_RESOLVED choice=keep")
+            #endif
+            return
+        }
+        guard let fileURL, let fileType else { return }
+        do {
+            try self.read(from: fileURL, ofType: fileType)
+            // Reload succeeded: the buffer again matches the on-disk saved state, so
+            // clear the dirty flag.
+            updateChangeCount(.changeCleared)
+            #if DEBUG
+            debugRuntimeLog("EXTERNAL_CHANGE_RESOLVED choice=reload")
+            #endif
+        } catch {
+            // The file changed again between prompt and click, or its new bytes no
+            // longer decode, so the reload failed. The user's kept edits are still in
+            // the buffer -- clearing the dirty flag here would mark the document clean
+            // over unsaved content and lose those edits silently at the next close.
+            // Leave the dirty flag alone and surface the failure instead (found in
+            // WP-L2 review; the same silent `try?` swallow WP-L3 kills on the
+            // presentedItemDidChange reload path).
+            surfaceExternalChangeAlert(.undecodable)
+            #if DEBUG
+            debugRuntimeLog("EXTERNAL_CHANGE_RESOLVED choice=reload result=failed")
+            #endif
+        }
+    }
+
+    /// Dismisses a single-button external-change alert (undecodable or deleted).
+    @MainActor
+    func dismissExternalChangeAlert() {
+        pendingExternalChange = nil
+    }
+
+    /// Probes the represented file's current on-disk modification state.
+    ///
+    /// Different from `NSDocument.fileModificationDate`, which stores the date that
+    /// existed when the document last read the file. Distinguishes a present mtime,
+    /// a missing file (deleted or moved), and an unreadable stat, so callers can
+    /// route each to the right matrix row instead of conflating them as `nil`.
+    nonisolated private func probeModificationDate() -> FileModificationProbe {
+        guard let path = fileURL?.path else { return .unreadable }
+        if !FileManager.default.fileExists(atPath: path) {
+            return .missing
+        }
+        guard let date = try? FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date else {
+            return .unreadable
+        }
+        return .date(date)
     }
 
     // MARK: - Close
@@ -409,4 +663,16 @@ private extension CodeFileDocument {
     static let fileTypeExtension: [String: String?] = [
         "public.make-source": nil
     ]
+
+    #if DEBUG
+    // Built as concatenated segments (rather than one long interpolated literal) so the
+    // line stays under SwiftLint's length limit; the emitted log text is unchanged. Kept
+    // in this extension rather than the class body so it does not grow the class's
+    // already-at-limit type_body_length.
+    static func logLoadedFile(_ document: CodeFileDocument) {
+        var message = "Loaded file: \(document.fileURL?.path ?? "<unknown>")"
+        message += " characters: \(document.content?.length ?? 0)"
+        debugRuntimeLog(message)
+    }
+    #endif
 }

@@ -33,6 +33,53 @@ app architecture: after MS, NSDocument/NSMenu/NSWindowController/delegate-chain 
 anywhere outside the isolated editor-surface adapter are defects. "Less AppKit is better" is
 the north star; zero AppKit is not pretended practical today.
 
+## Status tracker
+
+- M1 (decide and net) CLOSED 2026-07-10: WP-S0 (document architecture: `NSDocument` behind an
+  `NSDocumentController`-under-App bridge, architect-approved), WP-S0c (text engine: FAIL
+  confirmed, TextKit adapter stands), WP-L0 (contract plus four expected-fail lifecycle tests),
+  WP-Q5 (keystroke harness; corrected end-to-end baseline p95 15233 ms on the 1 MB fixture, git
+  028868f) - all spec review and quality review passed.
+- M3 (lifecycle correctness) CLOSED 2026-07-10: all four lifecycle audit findings closed
+  (F1-F4); zero expected-fail markers remain suite-wide (swift test: 134 tests, zero known
+  issues); smoke SMOKE_EXIT=0.
+- Also closed with review: WP-S1 (SwiftUI shell flip), WP-S2 (Commands menu, including the
+  multi-window routing fix), WP-F2 (theme loader), WP-F3 (user syntax), WP-F4 patch 1
+  (clean-text transforms), WP-F1 (find/replace panel port - patch 18, plus patch 19 deleting
+  `Packages/CodeEditSourceEditor`, 199 files) - both patches passed spec review 2026-07-10.
+- Dispatchable now: WP-Q6 measurement + review in flight; WP-S4 (shell deletion) next after a
+  human commit checkpoint; then WP-Q2, WP-G1/G2 and the WP-G0 smoke-capture integration patch.
+- WP-L0: COMPLETE. Document state contract plus four expected-fail Swift Testing lifecycle
+  tests (`CodeFileDocumentLifecycleGapTests.swift`, pinning WP-L1..WP-L4) written into
+  [document_architecture_decision.md](../decisions/document_architecture_decision.md); both
+  spec review and quality review passed.
+- WP-S0: status pointer below (see the WP-S0 work package entry) is extended to record the
+  architect's bridge-mechanism decision - document windows host through `NSDocumentController`
+  under a plain SwiftUI `App` (not `DocumentGroup`), with `CodeFileDocumentBridge.swift` as the
+  single sanctioned document-layer AppKit boundary.
+- WP-S0c: COMPLETE. Re-validation verdict FAIL confirmed on the same toolchain (keystroke p95
+  513.30 ms vs the 16 ms gate); the TextKit/AppKit editor adapter stands. Decision doc:
+  [text_engine_decision.md](../decisions/text_engine_decision.md).
+- WP-Q5: COMPLETE. Corrected end-to-end keystroke baseline p95 15233 ms on the 1 MB fixture
+  (git 028868f); spec review and quality review passed.
+- WP-F5: COMPLETE 2026-07-10. Settings scene (patches 15-16) plus live-apply observability seam;
+  full review PASS (Cmd+, scene, persisted keys, `SETTINGS_APPLIED` fontSize/theme gates in the
+  smoke script, DEBUG self-test seam, in-memory theme registry, `defaults` domain unpolluted).
+- WP-G0: COMPLETE 2026-07-10 (new enabler package). DEBUG-only TCC-free window self-capture seam
+  (`-PlainEditor.captureWindowTo`, `WINDOW_CAPTURE_WRITTEN` marker, temp-then-swap write); spec and
+  quality review PASS; smoke-script integration deferred to a follow-up patch. Note for
+  WP-G1/WP-G2: default capture renders dark mode and clears the 3-hue floor at the minimum - force
+  light appearance for the gated light capture.
+- WP-L1: COMPLETE 2026-07-10. Spec review and quality review closed, unblocking WP-L2. Audit
+  finding F1 closed; EditedTextChange two-case Sendable notification delivered for M8.
+- WP-L2: COMPLETE. Five-row external-change matrix, F2 closed, `e2e_external_change_conflict.py`
+  added; review PASS (one data-loss finding in `resolveExternalChangeConflict` was found in
+  review and fixed in the WP-L3 patch, re-reviewed PASS).
+- WP-L3: COMPLETE. Reload decode errors surfaced, clean+undecodable matrix row wired, F3 and F7
+  closed, encoding reload test added; review PASS.
+- WP-L4: COMPLETE. Post-reload undo-stack reset via the `.fullInvalidation` observer, F4 closed,
+  undo-ownership documented in docs/CODE_ARCHITECTURE.md; review PASS.
+
 ## Objectives
 
 - Every docs/SCOPE.md must-have feature is implemented and validated in the live app.
@@ -392,6 +439,8 @@ Durable components (code identifiers use these, never milestone names):
 - Obvious follow-ons: changelog entry; update docs referencing binary name.
 - Status 2026-07-09: implemented; spec review returned MUSTFIX but items 1-4 were overruled by manager verification - every flagged "user-visible CodeEdit string" lives in a Package.swift-excluded tree (Feedback, WindowCommands, Settings, SourceControl, CEWorkspace, LSP), never compiled and all on the WP-P1 deletion list; the compiled-files-only audit scope was correct. MUSTFIX 5 stands: reviewer's smoke rerun hit SMOKE_EXIT=1 (`Plain editor Swift syntax highlight:` wait timeout, elapsedMs=6158 landed after the wait window) while running concurrently with the WP-P4 bundle coder's builds/launches - the known cold-compute contention knife-edge owned by WP-Q1. CLOSED 2026-07-09: clean smoke rerun on an idle machine passed (SMOKE_EXIT=0); quality review PASS (all seven files consistent, binary name verified against the real build artifact, style conforms).
 
+### Work package: WP-P4 app bundle and icon
+
 - Owner: coder.
 - Touch points: new `scripts/make_app_bundle.sh`, Info.plist (CFBundleName SwiftlyCodeEdit, CFBundleGetInfoString tagline "A fast native code editor for macOS."), new `scripts/make_app_icon.py` plus generated `SwiftlyCodeEdit.icns` icon wiring.
 - Depends on: WP-P3.
@@ -408,6 +457,8 @@ Durable components (code identifiers use these, never milestone names):
 - Acceptance criteria: a minimal DocumentGroup + ReferenceFileDocument prototype demonstrates (or refutes) each of: autosave debounce parity, Save As, external-change reload into shared text storage, and encoding preservation on save; the decision doc records the chosen architecture (ReferenceFileDocument vs DocumentGroup-over-NSDocument bridge) with the evidence for each behavior BEFORE WP-S1 is dispatched.
 - Verification commands: prototype run log; lifecycle test suite executed against the prototype where feasible.
 - Obvious follow-ons: changelog decision entry; feed the chosen shape into WP-S1's task description.
+- Status 2026-07-09: COMPLETE, verdict "NSDocument behind a DocumentGroup bridge". A throwaway `DocumentGroup`+`ReferenceFileDocument` prototype (macOS 26.5.2, Swift 6.3.3, MacBookPro18,3) passed the encoding gates (Save As and open-edit-save round-trips byte-identical across all five encodings) but failed both lifecycle gates: no 2 s autosave debounce (`ReferenceFileDocument` has no `scheduleAutosaving` override; a force-dirtied document never autosaved within 8 s), and no external-change reload into the same `NSTextStorage` (reload was either not delivered in place or arrived as a fresh document with a new storage). Mechanical rule -> bridge. Keep `CodeFileDocument` as the `NSDocument` model; the single sanctioned document-layer AppKit bridge file is `CodeFileDocumentBridge.swift` (created by WP-S1). Re-evaluation trigger: next macOS SDK. Decision record: [document_architecture_decision.md](../decisions/document_architecture_decision.md).
+- Bridge-mechanism decision (architect, 2026-07-09, same decision doc): document windows host through `NSDocumentController` under a plain SwiftUI `App` scene, not `DocumentGroup` - this refines the mechanical verdict's "DocumentGroup" label to the concrete scene type. `CodeFileDocument` keeps sole ownership of the autosave debounce, the `NSFilePresenter` external-reload path, and the shared `NSTextStorage` identity; a `ReferenceFileDocument` facade under `DocumentGroup` cannot deliver this (`DocumentGroup` always manages its own private `NSDocument`, creating a double-owner conflict). WP-S1 wires `@main` as the SwiftUI `App`, routes File > New / File > Open to `NSDocumentController.shared`, and builds `CodeFileDocumentBridge.swift` accordingly.
 
 ### Work package: WP-S0b SwiftUI-native text engine spike
 
@@ -455,6 +506,9 @@ Durable components (code identifiers use these, never milestone names):
 - Acceptance criteria: Cmd-F opens find bar; literal and regex modes; next/previous navigation with visible selection; Cmd-Opt-F reveals replace; Replace and Replace All mutate the document and are undoable. Edge cases with tests: zero matches shows a clear "no results" state; invalid regex shows an inline error and disables navigation; overlapping regex matches follow documented non-overlapping left-to-right semantics; Replace All undoes as one operation; selection lands on the replaced text after each single replace. Panel matches Liquid Glass control-layer guidance.
 - Verification commands: new package tests for match/replace logic including the edge cases (inline fixtures); smoke assertion that find UI marker fires; `swift test`.
 - Obvious follow-ons: delete `Packages/CodeEditSourceEditor` via `git rm` once the ported panel is validated (completes the sequencing decision recorded in WP-P2); changelog.
+- Status 2026-07-10: COMPLETE. Patch 18 (find panel port into `CodeEdit/Features/Find/`) and
+  patch 19 (deletion of `Packages/CodeEditSourceEditor`, 199 files, completing the WP-P2
+  sequencing decision) both landed and passed spec review.
 
 ### Work package: WP-F0 Application Support path policy
 
@@ -493,7 +547,7 @@ Durable components (code identifiers use these, never milestone names):
 - Verification commands: package tests per action with inline fixtures; smoke self-test extended for one new action; `swift test`.
 - Obvious follow-ons: changelog; docs update describing each action.
 
-### Work package: WP-F5 general font menu
+### Work package: WP-F6 general font menu
 
 - Owner: coder.
 - Touch points: `PlainEditorFontSettings` and `PlainEditorCommandBar.fontControls` in `CodeEdit/Features/Editor/Views/CodeFileView.swift`; SwiftUI Commands menu (new Format > Font submenu).
@@ -560,6 +614,14 @@ Durable components (code identifiers use these, never milestone names):
 - Verification commands: `python3 tests/e2e/e2e_launch_time.py`; `./scripts/plain_editor_smoke.sh`.
 - Obvious follow-ons: changelog entry; record the hardware baseline next to the benchmark outputs under `test-results/perf/`.
 
+### Work package: WP-G0 DEBUG window self-capture seam (added 2026-07-10)
+
+- Owner: coder.
+- Touch points: DEBUG-only `-PlainEditor.captureWindowTo` launch-argument seam, `WINDOW_CAPTURE_WRITTEN` runtime marker, temp-then-swap write path so a partially written PNG is never observable.
+- Depends on: none within MG; feeds WP-G1/WP-G2 screenshot evidence.
+- Acceptance criteria: a TCC-free, DEBUG-only window self-capture path writes a PNG to the requested path via a temp file swapped into place, and logs `WINDOW_CAPTURE_WRITTEN` once the swap completes; no production/RELEASE code path is affected.
+- Status 2026-07-10: COMPLETE. Spec review and quality review both PASS. Smoke-script integration deferred to a follow-up patch (WP-G0 lands the seam; wiring it into `scripts/plain_editor_smoke.sh` is separate work). Note for WP-G1/WP-G2: the default capture renders in dark mode and clears the LIQUID_GLASS 3-hue floor at the minimum - force light appearance for the gated light-mode capture.
+
 ### Work package: WP-G1 glassEffect chrome
 
 - Owner: coder.
@@ -593,6 +655,7 @@ Durable components (code identifiers use these, never milestone names):
 - Depends on: MS exit (SwiftUI Settings scene wants the SwiftUI App shell; Cmd+, is a Scene, not a window hack).
 - User request 2026-07-09: "a proper settings dialog... where we can select settings like font that are more static/permanent."
 - Sketch: standard SwiftUI Settings scene (Cmd+,) per the SwiftUI-first boundary; font family/size (promote the existing PlainEditor.fontFamily/fontSize AppStorage keys from command-bar-only to a real preferences surface); theme picker binding to the WP-F2 loader; editor defaults (indentation style/width, default line ending); live-apply to open windows. Tracked user-facing in MILESTONE3_CHECKLIST.md.
+- Status 2026-07-10: COMPLETE. Settings scene (patches 15-16) plus a live-apply observability seam; full review PASS covering the Cmd+, scene, persisted font/theme/indent/line-ending keys, `SETTINGS_APPLIED` fontSize/theme gates in `scripts/plain_editor_smoke.sh`, a DEBUG-only self-test seam, the in-memory theme registry, and confirmation the `defaults` domain stays unpolluted.
 
 ## Acceptance criteria and gates
 

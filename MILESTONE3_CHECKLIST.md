@@ -16,6 +16,11 @@ inside the isolated `TextView` bridge adapter.
 
 - [ ] App launches via a SwiftUI `App` + `DocumentGroup` scene, replacing `@main enum
   CodeEditMain` and the hand-built `NSDocument`/`NSWindow` chain in `CodeEdit/CodeEditApp.swift`.
+  Document-model decision (WP-S0): keep `CodeFileDocument` as the `NSDocument` model behind a
+  `DocumentGroup` bridge, not a SwiftUI-native `ReferenceFileDocument` -- a measured prototype
+  failed the autosave-debounce and same-`NSTextStorage`-reload gates -- with the single sanctioned
+  document-layer AppKit bridge file `CodeFileDocumentBridge.swift` created by WP-S1; see
+  docs/active_plans/decisions/document_architecture_decision.md.
 - [ ] SwiftUI `Commands` menu replaces the hand-built `NSMenu` (`PlainEditorMainMenu`); every
   File/Edit/Find command reaches the active editor and keyboard shortcuts still work.
 - [ ] AppKit survives only inside the isolated `TextView` bridge adapter
@@ -81,16 +86,24 @@ Goal: replace command-bar-only controls for static preferences with a standard m
 scene; candidate WP-F5, user-requested 2026-07-09, with execution detail to be added to
 `docs/active_plans/active/scope_closure_plan.md`.
 
-- [ ] A standard macOS Settings scene (Cmd+,) built in SwiftUI per the SwiftUI-first principle in
+- [x] A standard macOS Settings scene (Cmd+,) built in SwiftUI per the SwiftUI-first principle in
   `docs/HUMAN_GUIDANCE.md`, replacing command-bar-only controls for static or permanent
-  preferences.
-- [ ] Font family and size selection persisted across launches. Foundation already shipped: the
+  preferences. Closed 2026-07-10, WP-F5 review PASS: Settings scene (patches 15-16) built via
+  the standard Cmd+, SwiftUI Settings scene.
+- [x] Font family and size selection persisted across launches. Foundation already shipped: the
   `PlainEditor.fontFamily` and `PlainEditor.fontSize` AppStorage keys are currently driven from the
-  command bar's A- and A+ controls.
-- [ ] Theme selection surface that binds to the WP-F2 theme loader when it lands.
-- [ ] Editor defaults for indentation (tabs versus spaces, width) and the default line ending for
-  new files.
-- [ ] Settings changes apply live to open windows without relaunch.
+  command bar's A- and A+ controls. Closed 2026-07-10, WP-F5 review PASS: font family/size now
+  live in the Settings scene with the same persisted AppStorage keys, gated by the
+  `SETTINGS_APPLIED` fontSize marker in `scripts/plain_editor_smoke.sh`.
+- [x] Theme selection surface that binds to the WP-F2 theme loader when it lands. Closed
+  2026-07-10, WP-F5 review PASS: theme picker binds to the WP-F2 in-memory theme registry, gated
+  by the `SETTINGS_APPLIED` theme marker in the smoke script.
+- [x] Editor defaults for indentation (tabs versus spaces, width) and the default line ending for
+  new files. Closed 2026-07-10, WP-F5 review PASS: indentation style/width and default line
+  ending are persisted Settings-scene fields per the WP-F5 review.
+- [x] Settings changes apply live to open windows without relaunch. Closed 2026-07-10, WP-F5
+  review PASS: live-apply observability seam plus `SETTINGS_APPLIED` fontSize/theme gates in
+  `scripts/plain_editor_smoke.sh` confirm changes reach open windows without relaunch.
 
 ## Large-file performance (WP-Q1 follow-on / WP-Q2)
 

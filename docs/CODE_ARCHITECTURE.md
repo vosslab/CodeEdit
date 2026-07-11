@@ -19,7 +19,9 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
 
 ## Major components
 
-- [CodeEditApp.swift](../CodeEdit/CodeEditApp.swift): app entry point and scene setup.
+- [SwiftlyCodeEditApp.swift](../CodeEdit/App/SwiftlyCodeEditApp.swift): the single SwiftUI `App` `@main` entry point (Settings scene plus File commands). Document windows are hosted through `NSDocumentController` under this plain `App` scene, not `DocumentGroup`.
+- [CodeFileDocumentBridge.swift](../CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocumentBridge.swift): the single sanctioned document-layer AppKit boundary -- the launch-path app delegate, `NSDocumentController` document actions, and the `NSWindowController`+`NSHostingController` window hosting that `CodeFileDocument.makeWindowControllers()` delegates into.
+- [CodeEditApp.swift](../CodeEdit/CodeEditApp.swift): the retired AppKit shell (`CodeEditMain`, `PlainEditorAppDelegate`, `PlainEditorMainMenu`), now unreachable dead code kept until WP-S4 deletes it; its `launchStartNanoseconds`/`logLaunchToWindowIfNeeded` statics still back the `LAUNCH_TO_WINDOW_MS` marker.
 - [CodeFileView.swift](../CodeEdit/Features/Editor/Views/CodeFileView.swift): document-to-editor bridge used by the plain editor surface.
 - [PlainTextEditorView.swift](../CodeEdit/Features/Editor/Views/PlainTextEditorView.swift): AppKit/TextKit wrapper around `CodeEditTextView.TextView`.
 - `CodeEdit/Features/Editor/PlainEditorTextCleaner.swift`: deterministic text-cleaning helpers used by the Clean Text command.
@@ -32,9 +34,10 @@ SwiftUI owns the app shell. AppKit and TextKit own the editor surface through a 
   pipeline (see below).
 - `DefaultThemes`: theme data files.
 
-`Packages/CodeEditSourceEditor` is not a build dependency in
-[Package.swift](../Package.swift); it is retained on disk as the harvest source for WP-F1
-(porting editor-surface behavior into the plain-editor path), not as live app code.
+`Packages/CodeEditSourceEditor` was never a build dependency in
+[Package.swift](../Package.swift); it was retained on disk only as the harvest source for WP-F1
+(porting find-panel behavior into `CodeEdit/Features/Find/`) and was deleted once that port
+landed (WP-F1 patch 19).
 
 ## Syntax-highlight pipeline
 
@@ -65,6 +68,35 @@ Each stage is independently timeable via the headless benchmark
 (`scripts/highlight_benchmark.sh`), which prints per-stage `HIGHLIGHT_BENCH_STAGES` timings
 (`parseMs`/`interpretMs`/`spanMapMs`) alongside the overall `HIGHLIGHT_BENCH` totals line and
 writes both to the `test-results/perf/highlight_cold_pass.txt` artifact.
+
+### Dirty-range contract and bounded rehighlight
+
+Per-keystroke highlighting is bounded to a region, not the whole document (WP-Q6). The document
+model (`CodeFileDocument`) owns change tracking and broadcasts a typed edited-range payload,
+`EditedTextChange`, on every text mutation:
+
+- `.range(replacedRange:newLength:)` for a bounded edit (typing, paste, undo, redo, find-replace,
+  and Clean Text, which replaces the whole buffer in one call and so arrives as a whole-buffer
+  range edit, not `.fullInvalidation`).
+- `.fullInvalidation` for an external reload, where the document's read path replaces the buffer
+  via `setString` and reinterprets the whole document itself.
+
+`CodeFileView` subscribes with `addEditObserver` and routes each `.range` edit to
+`PlainSyntaxHighlighter.rehighlight(...)`. This edited-range broadcast is the single highlight
+driver for edits; `onTextChange` no longer schedules a highlight, so exactly one bounded pass runs
+per edit (the former double-highlight is removed). `PlainSyntaxHighlighter.rehighlight` reinterprets
+only a region around the edit (the edited line plus a fixed context window), extracts just that
+region's substring (so `storage.string` is never copied in full on a keystroke), and paints
+foreground colors over just that region; NSTextStorage shifts the attributes outside the region to
+follow the edit. A whole-buffer range edit (Clean Text) is detected as a whole-document region and
+delegates to the full path. On cold open, a large document paints its viewport region first, then
+interprets the whole document in the background under the same per-storage generation counter, so a
+newer edit supersedes the pair and a superseded task is cancelled rather than left running.
+
+Because the Kate interpreter is stateful (its context stack depends on all preceding text), a
+bounded region that begins inside a long multi-line string or comment can mis-color its head; the
+context window is a pragmatic mitigation, and a total collapse is caught by the hue-family gate.
+Small documents (below the bounded threshold) always take the well-tested full-document path.
 
 ## Required build path
 
@@ -104,6 +136,20 @@ These surfaces remain legacy or optional during the cutover:
 - TextKit owns the actual editor editing mechanics through `CodeEditTextView`.
 - Data files own syntax definitions and themes so new content can be added without rebuilding app logic.
 - App Intents in this repo are smoke-test hooks only, not a user-facing automation product surface.
+
+## Undo manager ownership
+
+Each `CodeEditTextView.TextView` owns a single `CEUndoManager` (its `_undoManager`);
+that text view's undo manager is the one undo owner for the document. The pre-migration
+answer was "ad hoc, wired in `PlainEditorActionRouter`"; after the SwiftUI migration the
+undo manager belongs to the text view the adapter (`PlainTextEditorView`) hosts, and
+`EditorCommandRouter`/the command ribbon route Undo and Redo through that same
+`TextView.undoManager`. No SwiftUI `\.environment(\.undoManager)` is set, so no second
+competing stack exists. On an external-change reload the document mutates the shared
+`NSTextStorage` in place (preserving object identity) and broadcasts `.fullInvalidation`;
+`CodeFileView`'s reload observer -- the editor layer that holds the undo manager -- clears
+that now-stale stack (`clearStack()`) so a post-reload Undo is a clean no-op rather than a
+replay against mismatched offsets. The document never touches the undo manager directly.
 
 ## Product shell styling
 

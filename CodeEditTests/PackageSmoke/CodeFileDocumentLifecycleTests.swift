@@ -260,4 +260,97 @@ struct CodeFileDocumentLifecycleTests {
             #expect(PlainEditorStatusReporter.encodingLabel(codeFile.sourceEncoding) != "ISO Latin-1")
         }
     }
+
+    // WP-L3 reload-direction encoding case: a file opened as UTF-8 that is rewritten on disk in a
+    // different but still-supported encoding (Latin-1) reloads to the new decoded text with the
+    // re-detected encoding recorded. This exercises the successful clean-reload branch and the
+    // encoding re-detection the reload path performs, the decode direction opposite the initial
+    // open the rest of this matrix covers.
+    @Test
+    @MainActor
+    func reloadRedetectsEncodingForDecodableExternalChange() throws {
+        try withTempDir { dir in
+            let sourceURL = dir.appending(path: "reload_encoding.txt")
+            let originalText = "plain ascii\n"
+            try originalText.write(to: sourceURL, atomically: true, encoding: .utf8)
+
+            let codeFile = try CodeFileDocument(
+                for: sourceURL,
+                withContentsOf: sourceURL,
+                ofType: "public.plain-text"
+            )
+            #expect(codeFile.sourceEncoding == .utf8)
+
+            // Rewrite the backing file in Latin-1 with high bytes that are invalid standalone
+            // UTF-8, then reload through the same read path the external-change handler uses.
+            let reloadedText = "Caf\u{E9} r\u{E9}sum\u{E9}\n"
+            let latin1Bytes = reloadedText.data(using: .isoLatin1)
+            #expect(latin1Bytes != nil)
+            try latin1Bytes?.write(to: sourceURL)
+            try codeFile.read(from: sourceURL, ofType: "public.plain-text")
+
+            #expect(codeFile.content?.string == reloadedText)
+            #expect(codeFile.sourceEncoding == .latin1)
+        }
+    }
+
+    // WP-L1 deliverable: a bounded edit broadcasts the explicit range case of the two-case
+    // edited-range change notification (replaced range plus new length), so a range-bounded
+    // consumer (M8 rehighlighter/status) rescans only the edited region, never the whole buffer.
+    @Test
+    @MainActor
+    func recordEditBroadcastsBoundedRangeChange() throws {
+        try withTempDir { dir in
+            let sourceURL = dir.appending(path: "edited_range.swift")
+            try "let value = 1\n".write(to: sourceURL, atomically: true, encoding: .utf8)
+
+            let codeFile = try CodeFileDocument(
+                for: sourceURL,
+                withContentsOf: sourceURL,
+                ofType: "public.source-code"
+            )
+
+            let recorder = EditChangeRecorder()
+            codeFile.addEditObserver { recorder.changes.append($0) }
+
+            codeFile.recordEdit(.edit, replacedRange: NSRange(location: 4, length: 5), newLength: 7)
+
+            #expect(recorder.changes == [.range(replacedRange: NSRange(location: 4, length: 5), newLength: 7)])
+        }
+    }
+
+    // WP-L1 deliverable: an external reload replaces the whole buffer and broadcasts the explicit
+    // full-invalidation case, distinct from a bounded range edit, so consumers rescan everything.
+    @Test
+    @MainActor
+    func externalReloadBroadcastsFullInvalidation() throws {
+        try withTempDir { dir in
+            let sourceURL = dir.appending(path: "reload_invalidation.swift")
+            try "let value = 1\n".write(to: sourceURL, atomically: true, encoding: .utf8)
+
+            let codeFile = try CodeFileDocument(
+                for: sourceURL,
+                withContentsOf: sourceURL,
+                ofType: "public.source-code"
+            )
+
+            let recorder = EditChangeRecorder()
+            codeFile.addEditObserver { recorder.changes.append($0) }
+
+            // Rewrite the backing file and reload through the same read path the
+            // external-change handler uses; the whole buffer is replaced.
+            try "let value = 22\n".write(to: sourceURL, atomically: true, encoding: .utf8)
+            try codeFile.read(from: sourceURL, ofType: "public.source-code")
+
+            #expect(recorder.changes == [.fullInvalidation])
+        }
+    }
+}
+
+/// Collects broadcast ``CodeFileDocument/EditedTextChange`` values for assertion. A main-actor
+/// reference type so the escaping observer closure records into shared state without capturing a
+/// mutable local.
+@MainActor
+private final class EditChangeRecorder {
+    var changes: [CodeFileDocument.EditedTextChange] = []
 }

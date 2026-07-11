@@ -7,8 +7,9 @@
 - `Packages`: local Swift packages used by the app and editor.
   `CodeEditHighlighting`, `CodeEditLanguages`, `CodeEditTextView`, and
   `CodeEditSyntaxDefinitions` are build dependencies in
-  [`Package.swift`](../Package.swift); `CodeEditSourceEditor` is kept as WP-F1 harvest
-  source and is not a build dependency.
+  [`Package.swift`](../Package.swift). `CodeEditSourceEditor` was kept as a WP-F1 harvest
+  source (never a build dependency); patch 19 deleted it once its find-panel behavior was
+  ported into `CodeEdit/Features/Find/`.
 - `CodeEditTests`: unit and feature tests. Only `CodeEditTests/PackageSmoke` is
   the live SwiftPM testTarget path.
 - `scripts`: shell/Python helpers invoked directly (smoke test, highlight benchmark, app

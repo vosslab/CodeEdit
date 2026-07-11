@@ -41,8 +41,10 @@ cp "$SOURCE_TEMPLATE" "$SOURCE_FILE"
 pkill -x SwiftlyCodeEdit 2>/dev/null || true
 : >"$LOG_FILE"
 : >"$RUNTIME_LOG"
+
 CODEEDIT_DEBUG_SOURCE_FILE="$SOURCE_FILE" \
 CODEEDIT_PLAIN_EDITOR_COMMAND_SELF_TEST=1 \
+CODEEDIT_SETTINGS_APPLY_SELF_TEST=1 \
 "$APP_PATH" "--kill-after=$APP_KILL_AFTER_SECONDS" >"$LOG_FILE" 2>&1 &
 APP_PID="$!"
 
@@ -82,6 +84,48 @@ wait_for_line() {
   return 1
 }
 
+# Extracts one top-level menu's own bracketed item list from the "Main menu
+# items:" line, anchored on a preceding "| " or start-of-line so a menu name
+# that is a substring of another title (Edit inside "SwiftlyCodeEdit: [...]")
+# can never match the wrong bracket group.
+extract_menu_section() {
+  local menu_name="$1"
+  grep -oE "(^|\\| )${menu_name}: \\[[^]]*\\]" "$RUNTIME_LOG" | tail -1
+}
+
+# Hard gate: fails unless every first-party item named in the plan's menu
+# inventory is present in the given menu's bracket section. macOS injects
+# extra items (Writing Tools, AutoFill, Start Dictation, Emoji & Symbols,
+# blank separators) that vary by OS version and are not checked here; only
+# a missing first-party item fails the run.
+check_menu_has_items() {
+  local menu_name="$1"
+  shift
+  local section
+  # `|| true` keeps `set -e` from short-circuiting past the diagnostic below
+  # when extract_menu_section's grep finds nothing (grep exits non-zero on
+  # no match, which would otherwise abort the script before the missing-
+  # section message and log dump ever print).
+  section="$(extract_menu_section "$menu_name")" || true
+  if [ -z "$section" ]; then
+    echo "Main menu items: missing menu section '$menu_name'" >&2
+    cat "$RUNTIME_LOG" >&2
+    return 1
+  fi
+  local item
+  for item in "$@"; do
+    local escaped_item
+    escaped_item="$(printf '%s' "$item" | sed -E 's/([.[\*^$+?(){}|\\])/\\\1/g')"
+    if ! echo "$section" | grep -E "(\\[|, )${escaped_item}(,|\\])" >/dev/null 2>&1; then
+      echo "Main menu items: menu '$menu_name' missing expected item '$item'" >&2
+      echo "$section" >&2
+      return 1
+    fi
+  done
+  return 0
+}
+
+wait_for_line "SHELL=SwiftUI"
 wait_for_line "Plain editor launch path ready"
 wait_for_line "Loaded document: $SOURCE_FILE"
 wait_for_line "Loaded file: $SOURCE_FILE"
@@ -97,8 +141,19 @@ wait_for_line "lineEnding=LF"
 wait_for_line "Plain editor Swift syntax highlight:"
 wait_for_line "tokens=comment,keyword,number,string,type"
 wait_for_line "colors=6"
-wait_for_line "Plain editor command self-test: insert=true undo=true redo=true selectAll=true copy=true cut=true paste=true cleanText=true cleanUndo=true cleanRedo=true"
+wait_for_line "Plain editor command self-test: insert=true undo=true redo=true selectAll=true copy=true cut=true paste=true cleanText=true cleanUndo=true cleanRedo=true cleanLineEndings=true cleanFinalNewline=true cleanTabsToSpaces=true cleanSpacesToTabs=true cleanSmartPunct=true"
+# WP-F5 live-apply: the settings self-test performs a real post-mount font-size
+# and theme change through the same @AppStorage path the Settings window uses,
+# so both view-application markers must appear, then it restores the prior
+# values (proving the seam persisted nothing to the user's preferences).
+wait_for_line "SETTINGS_APPLIED key=fontSize"
+wait_for_line "SETTINGS_APPLIED key=theme"
+wait_for_line "SETTINGS_APPLY_SELF_TEST fontRestored=true themeRestored=true"
 wait_for_line "Main menu items:"
+check_menu_has_items "File" "New" "Open..." "Save" "Save As..." "Close"
+check_menu_has_items "Edit" "Undo" "Redo" "Cut" "Copy" "Paste" "Select All" "Clean Text"
+check_menu_has_items "Find" "Find..." "Find and Replace..."
+check_menu_has_items "Format" "Font and Text Options"
 
 # Optional diagnostic: screenshot capture depends on machine-local tooling and
 # the macOS screen-recording TCC grant, neither of which is a repo bug. A
@@ -108,20 +163,24 @@ if [ "$NO_SCREENSHOT" -eq 1 ]; then
 elif [ ! -x "$HOME/nsh/easy-screenshot/run.sh" ]; then
   echo "SKIPPED: screenshot capture, missing helper $HOME/nsh/easy-screenshot/run.sh"
 else
-  # Only remove the git-tracked screenshot on the branch that will actually
-  # regenerate it, so a SKIPPED run leaves the tracked file untouched.
-  rm -f "$SCREENSHOT_FILE"
+  # Capture to a scratch path first and only overwrite the git-tracked
+  # screenshot with `mv` after a confirmed non-empty capture. A TCC-denied
+  # or otherwise failed capture then leaves the tracked file untouched
+  # instead of being deleted ahead of an attempt that produces nothing.
+  SCREENSHOT_SCRATCH="$(mktemp "${TMPDIR:-/tmp}/codeedit_smoke_screenshot.XXXXXX.png")"
   "$HOME/nsh/easy-screenshot/run.sh" \
     -A SwiftlyCodeEdit \
     -t "$(basename "$SOURCE_FILE")" \
-    -f "$SCREENSHOT_FILE" >>"$RUNTIME_LOG" 2>&1 || true
-  if [ -s "$SCREENSHOT_FILE" ]; then
+    -f "$SCREENSHOT_SCRATCH" >>"$RUNTIME_LOG" 2>&1 || true
+  if [ -s "$SCREENSHOT_SCRATCH" ]; then
+    mv "$SCREENSHOT_SCRATCH" "$SCREENSHOT_FILE"
     echo "Screenshot captured: $SCREENSHOT_FILE" >>"$RUNTIME_LOG"
     wait_for_line "Screenshot captured: $SCREENSHOT_FILE"
     # Hard gate: a captured screenshot showing plain unhighlighted text must
     # fail the smoke run, not pass silently.
     python3 tests/e2e/e2e_screenshot_colors.py "$SCREENSHOT_FILE"
   else
+    rm -f "$SCREENSHOT_SCRATCH"
     echo "SKIPPED: screenshot capture, helper ran but produced no file (likely denied screen-recording permission)"
   fi
 fi

@@ -12,11 +12,16 @@ identifier_name:
   excluded:
     - id
     - vc
+    - lf # LineEndingStyle case name (PlainEditorTextCleaner.swift, PlainEditorSettingsKeys.swift); crlf is 4 chars and already passes the default min_length
 
 # paths to ignore during linting.
 excluded:
   - CodeEditModules/.build # Where Swift Package Manager checks out dependency sources
   - DerivedData
+  - .build # SwiftPM build products for this package
+  - Packages/*/.build # SwiftPM build products for local packages
+  - OTHER_REPOS # gitignored reference checkouts, not this repo's source (see .gitignore)
+  - .tmp # gitignored macro-expansion build artifacts (see .gitignore)
 
 opt_in_rules:
   - attributes

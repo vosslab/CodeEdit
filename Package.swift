@@ -32,6 +32,7 @@ let package = Package(
             path: "CodeEdit",
             resources: [
                 .process("Assets.xcassets"),
+                .process("Features/Theming/Resources/Themes"),
             ]
         ),
         .testTarget(

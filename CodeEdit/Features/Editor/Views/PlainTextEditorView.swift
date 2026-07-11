@@ -27,10 +27,17 @@ struct PlainTextEditorView: NSViewControllerRepresentable {
     final class Coordinator: NSObject, @preconcurrency TextViewDelegate {
         weak var textView: TextView?
         var onTextChange: (() -> Void)?
+        var onEdit: ((NSRange, Int) -> Void)?
         var onSelectionChange: ((NSRange) -> Void)?
 
+        // Fires once per replaced range, including the per-mutation replays an
+        // undo/redo drives through `replaceCharacters`. The range and replacement
+        // length are the document's per-mutation change-tracking and edited-range
+        // signal (`replacedRange` plus `newLength`); the coarser `onTextChange`
+        // notification below drives idempotent whole-view refresh (highlight,
+        // status, find) once per edit session.
         func textView(_ textView: TextView, didReplaceContentsIn range: NSRange, with string: String) {
-            onTextChange?()
+            onEdit?(range, (string as NSString).length)
         }
 
         func attachNotifications(to textView: TextView) {
@@ -49,12 +56,14 @@ struct PlainTextEditorView: NSViewControllerRepresentable {
             )
         }
 
-        @objc func handleSelectionChanged(_ notification: Notification) {
+        @objc
+        func handleSelectionChanged(_ notification: Notification) {
             guard let textView else { return }
             onSelectionChange?(textView.selectedRange())
         }
 
-        @objc func handleTextChanged(_ notification: Notification) {
+        @objc
+        func handleTextChanged(_ notification: Notification) {
             guard let textView else { return }
             onTextChange?()
             onSelectionChange?(textView.selectedRange())
@@ -72,6 +81,7 @@ struct PlainTextEditorView: NSViewControllerRepresentable {
     var edgeInsets: HorizontalEdgeInsets
     var textInsets: HorizontalEdgeInsets
     var onTextChange: (() -> Void)?
+    var onEdit: ((NSRange, Int) -> Void)?
     var onSelectionChange: ((NSRange) -> Void)?
     var onTextStorageReady: ((NSTextStorage) -> Void)?
     var onTextViewReady: ((TextView) -> Void)?
@@ -111,6 +121,7 @@ struct PlainTextEditorView: NSViewControllerRepresentable {
         controller.textView = textView
         context.coordinator.textView = textView
         context.coordinator.onTextChange = onTextChange
+        context.coordinator.onEdit = onEdit
         context.coordinator.onSelectionChange = onSelectionChange
         onTextViewReady?(textView)
         #if DEBUG
@@ -127,23 +138,48 @@ struct PlainTextEditorView: NSViewControllerRepresentable {
         }
 
         context.coordinator.onTextChange = onTextChange
+        context.coordinator.onEdit = onEdit
         context.coordinator.onSelectionChange = onSelectionChange
         if context.coordinator.textView != nil {
             let textView = context.coordinator.textView!
             context.coordinator.attachNotifications(to: textView)
         }
 
-        if textView.string != textStorage.string {
+        // Fire the storage-ready hook only when the backing store was actually
+        // swapped (a new NSTextStorage replaced the old one). SwiftUI re-runs
+        // updateNSViewController on every keystroke, so calling the hook here
+        // unconditionally scheduled a whole-document highlight per edit that
+        // superseded the bounded WP-Q6 rehighlight -- the ~2 s fixed cost the
+        // keystroke bench measured. A same-storage keystroke no longer reaches
+        // the hook; the initial highlight runs from makeNSViewController and
+        // reloads re-highlight through the document read path (WP-Q6 fix).
+        let storageDidChange = textView.string != textStorage.string
+        if storageDidChange {
             textView.setTextStorage(textStorage)
         }
         applyFont(to: textStorage)
-        onTextStorageReady?(textStorage)
+        if storageDidChange {
+            onTextStorageReady?(textStorage)
+        }
 
         textView.isEditable = isEditable
         textView.isSelectable = isSelectable
         textView.wrapLines = wrapLines
         textView.useSystemCursor = useSystemCursor
+        // This is the view-application site for the Settings scene's font
+        // controls (WP-F5): compare against the font already on the live
+        // text view before overwriting it, so the marker logs only after an
+        // actual rendered-state change, never from the @AppStorage write
+        // itself. The very first update after makeNSViewController already
+        // set this same font, so creation never logs a spurious change.
+        let previousFont = textView.font
         textView.font = font
+        if previousFont.pointSize != font.pointSize {
+            debugRuntimeLog("SETTINGS_APPLIED key=fontSize")
+        }
+        if previousFont.fontName != font.fontName {
+            debugRuntimeLog("SETTINGS_APPLIED key=fontFamily")
+        }
         textView.textColor = textColor
         textView.lineHeight = lineHeightMultiplier
         textView.edgeInsets = edgeInsets

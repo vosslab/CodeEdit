@@ -74,6 +74,22 @@ Known issues and fixes for SwiftlyCodeEdit development and smoke testing. See
 - Fix: Expect a multi-second wait on very large files until viewport-first
   highlighting ships as future work; no current user action resolves it.
 
+## A dialog asks to keep my edits or reload from disk
+
+- Symptom: While a file is open with unsaved edits, another program changes
+  the same file on disk, and the editor shows an alert titled "This file has
+  changed on disk" with "Keep My Edits" and "Reload from Disk" buttons.
+- Cause: The document detected an external change while it had unsaved edits.
+  It surfaces the conflict rather than silently discarding either version, so
+  no edit is lost without an explicit choice. A clean document (no unsaved
+  edits) instead reloads silently and shows no dialog.
+- Fix: Choose "Keep My Edits" to keep the in-memory version (the next save
+  overwrites the on-disk copy), or "Reload from Disk" to load the on-disk
+  version and discard the unsaved edits. Related alerts appear when the new
+  on-disk bytes are not valid text in a supported encoding (the buffer is left
+  untouched) or when the file was deleted or moved (edits are kept and the next
+  Save routes through Save As).
+
 ## App launched with `open` leaves a stray running instance
 
 - Symptom: A LaunchServices `open` of the built `.app` bundle (for example to

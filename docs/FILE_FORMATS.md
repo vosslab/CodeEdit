@@ -56,13 +56,25 @@ mappings) and runs it through a context-scoped interpreter to produce
 span-map pipeline stages and their performance seams (`FirstCharFilter`,
 `CompiledRegexCache`).
 
-A drop-in user syntax directory (a Kate XML file placed under
-`~/Library/Application Support/SwiftlyCodeEdit/Syntax/` highlighting a new
-language after a relaunch, no rebuild required) is planned but not yet
-wired up: `UserDataDirectories` (`CodeEdit/Features/Support/UserDataDirectories.swift`)
-already defines the `Syntax/` subdirectory path and a `discoverFiles`
-helper, but no caller yet feeds discovered files into
-`SyntaxDefinitionRepository`. Tracked in [docs/ROADMAP.md](ROADMAP.md).
+A drop-in user syntax directory is live: a Kate XML file placed under
+`~/Library/Application Support/SwiftlyCodeEdit/Syntax/` highlights a new
+language after a relaunch, with no rebuild required. `SyntaxDefinitionRepository`
+builds its file-URL map once, at first access, by merging the bundled corpus
+with every `.xml` file found directly inside that directory (non-recursive).
+The map is keyed by lowercased filename stem, so a user file with the same
+stem as a bundled one (for example a user-authored `python.xml`) wins the
+collision and replaces the bundled definition for that key. A user file that
+fails to parse (no matching `<language name="...">` tag, per the package's
+regex-based parser) is logged to stderr and skipped once; every other
+definition, bundled or user, keeps loading normally.
+
+`CodeEditSyntaxDefinitions` is dependency-free and cannot import
+`CodeEdit/Features/Support/UserDataDirectories.swift` (the `CodeEdit` app
+target depends on the package, not the reverse), so the package carries its
+own `UserSyntaxDirectory` helper that mirrors the same
+`SwiftlyCodeEdit/Syntax/` path policy rather than sharing code with
+`UserDataDirectories`. Both files must be kept pointing at the same directory
+name if either changes.
 
 ## Theme YAML
 

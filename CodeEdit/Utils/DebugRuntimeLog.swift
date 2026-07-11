@@ -3,7 +3,7 @@ import Foundation
 @inline(__always)
 func debugRuntimeLog(_ message: String) {
     #if DEBUG
-    guard let data = "\(message)\n".data(using: .utf8) else { return }
+    let data = Data("\(message)\n".utf8)
     let logURL = URL(fileURLWithPath: "/tmp/codeedit_runtime.log")
     if FileManager.default.fileExists(atPath: logURL.path) {
         if let handle = try? FileHandle(forWritingTo: logURL) {

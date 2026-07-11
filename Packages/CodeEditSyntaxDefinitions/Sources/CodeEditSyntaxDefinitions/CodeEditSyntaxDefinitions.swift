@@ -225,7 +225,20 @@ public final class SyntaxDefinitionRepository: @unchecked Sendable {
     private var loadedFileNames: Set<String> = []
 
     private init() {
-        self.fileURLs = SyntaxDefinitionLoader.loadBundledFileURLs()
+        self.fileURLs = SyntaxDefinitionLoader.mergedFileURLs(
+            bundled: SyntaxDefinitionLoader.loadBundledFileURLs(),
+            user: UserSyntaxDirectory.discoverFileURLs()
+        )
+    }
+
+    // Test-only seam: builds a repository from an explicit file-URL map,
+    // bypassing `Bundle.module` discovery and the real Application Support
+    // directory. `.shared`'s definition/loaded-file caches are process-wide and
+    // exercised by the concurrency regression test, so tests that need a
+    // malformed-file or collision fixture use their own instance here instead
+    // of mutating `.shared`.
+    init(fileURLs: [String: URL]) {
+        self.fileURLs = fileURLs
     }
 
     public func highlightSpans(text: String, language: String) -> [HighlightSpan] {
@@ -272,6 +285,11 @@ public final class SyntaxDefinitionRepository: @unchecked Sendable {
         }
         guard let contents = try? String(contentsOf: url, encoding: .utf8),
               let definition = SyntaxDefinitionLoader.load(from: contents) else {
+            // Mark as loaded even on failure so a malformed file (most likely a
+            // user-authored override dropped into the Syntax directory) is
+            // logged and retried at most once per process, not on every lookup.
+            loadedFileNames.insert(url.lastPathComponent.lowercased())
+            logMalformedSyntaxFile(url)
             return nil
         }
 
@@ -308,6 +326,17 @@ enum SyntaxDefinitionLoader {
 	static func loadBundledFileURLs() -> [String: URL] {
 		let files = Bundle.module.urls(forResourcesWithExtension: "xml", subdirectory: nil) ?? []
 		return Dictionary(uniqueKeysWithValues: files.map { ($0.deletingPathExtension().lastPathComponent.lowercased(), $0) })
+	}
+
+	// Merges the bundled and user file-URL maps, keyed by lowercased filename
+	// stem. The user map is applied last, so a user file with the same key as a
+	// bundled one wins the collision.
+	static func mergedFileURLs(bundled: [String: URL], user: [String: URL]) -> [String: URL] {
+		var merged = bundled
+		for (key, url) in user {
+			merged[key] = url
+		}
+		return merged
 	}
 
     static func load(from contents: String) -> SyntaxDefinition? {
@@ -1005,6 +1034,17 @@ private func highlightToken(for attribute: String) -> HighlightToken {
     if value.contains("operator") || value.contains("separator") || value.contains("symbol") { return .operatorToken }
     if value.contains("markup") || value.contains("header") || value.contains("list") || value.contains("code") || value.contains("quote") { return .markup }
     return .plainText
+}
+
+// This package has no dependency on the `CodeEdit` app target's
+// `debugRuntimeLog`, and does not write to its fixed `/tmp/codeedit_runtime.log`
+// path (that file is a separate lane's contract). A malformed syntax file --
+// most likely a user-authored override the app cannot read or parse -- is
+// reported to stderr instead, once per file per process (see the
+// `loadedFileNames` guard in `SyntaxDefinitionRepository.loadDefinition`).
+private func logMalformedSyntaxFile(_ url: URL) {
+    let message = "SyntaxDefinitionRepository: skipping malformed syntax file: \(url.path)\n"
+    FileHandle.standardError.write(Data(message.utf8))
 }
 
 private func isStyledAttribute(_ attribute: String) -> Bool {

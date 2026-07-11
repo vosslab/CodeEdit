@@ -4,6 +4,14 @@ Schema for syntax highlighting theme files (WP-F2 Patch A). This document
 defines the on-disk format only; the loader and menu integration are WP-F2
 Patch B.
 
+**Loaded by:** `CodeEdit/Features/Theming/ThemeRepository.swift` (discovery
+and fallback resolution), `CodeEdit/Features/Theming/ThemeParser.swift`
+(this schema's parser, YAML-subset and JSON), and
+`CodeEdit/Features/Editor/Views/PlainSyntaxHighlighter.swift` (the highlighter
+that resolves colors through `ThemeRepository` instead of a hardcoded
+palette). The bundled default theme ships at
+`CodeEdit/Features/Theming/Resources/Themes/standard.yaml`.
+
 ## Format choice
 
 Themes are one YAML file per theme (`.yaml`). YAML matches this repo's data

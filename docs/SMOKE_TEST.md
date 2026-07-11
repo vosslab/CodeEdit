@@ -23,9 +23,11 @@ finishes; without the flag, the app behaves normally and never auto-quits.
 The smoke script `rm -f`s its own stale artifacts (runtime log, prior smoke
 source copy) before every run, so a pass always reflects that run's evidence,
 not leftovers from an earlier one. The git-tracked screenshot file is left
-alone at start-of-run cleanup and is only removed immediately before a run
-that will actually recapture it, so a `--no-screenshot` run or a run without
-the screenshot helper never deletes the tracked file. It launches the debug
+alone entirely unless a capture attempt actually produces a non-empty file:
+the helper writes to a `mktemp` scratch path first, and only a confirmed
+non-empty capture is `mv`d over the tracked screenshot, so a `--no-screenshot`
+run, a run without the screenshot helper, or a TCC-denied capture never
+deletes or blanks the tracked file. It launches the debug
 app against a temporary copy of
 `CodeEdit/Features/Documents/CodeFileDocument/CodeFileDocument.swift`, passing
 `--kill-after=N` so the launched instance always quits itself rather than
@@ -40,13 +42,37 @@ redirection or a wrapper to learn the result.
 
 A failure in any of these fails the whole run:
 
+- the `SHELL=SwiftUI` marker, proving the running shell is the SwiftUI `App`
+  entry point (`SwiftlyCodeEditApp`), not the retired AppKit `CodeEditMain`
+  enum
 - deterministic file-backed launch
 - editor window creation
 - command ribbon and status bar creation
 - Swift status mode, UTF-8 encoding, and LF line-ending reporting
 - meaningful Swift syntax highlighting tokens and color count
-- active-editor insert, Undo, Redo, Select All, Copy, Cut, and Paste
-- Clean Text trailing space/tab trimming, plus Clean Text Undo and Redo
+- the full active-editor command self-test line: insert, Undo, Redo, Select
+  All, Copy, Cut, Paste, Clean Text (plus its own Undo/Redo), and all four
+  Clean Text sub-cleaners (line endings, final newline, tabs-to-spaces,
+  spaces-to-tabs, and smart punctuation)
+- the Settings live-apply markers (WP-F5): the `SETTINGS_APPLY_SELF_TEST`
+  seam (enabled by `CODEEDIT_SETTINGS_APPLY_SELF_TEST=1`) performs a real
+  post-mount font-size and theme change through the same `@AppStorage` path
+  the Settings window uses, so `SETTINGS_APPLIED key=fontSize` and
+  `SETTINGS_APPLIED key=theme` must both appear from their view-application
+  sites (the font set on the text view, the theme colors applied), never from
+  the storage write; the seam then restores the prior values and logs
+  `SETTINGS_APPLY_SELF_TEST fontRestored=true themeRestored=true`, proving the
+  live change reversed and left the user's stored preferences untouched
+- the Commands-menu item inventory: the runtime log's `Main menu items:`
+  line is parsed per top-level menu (File, Edit, Find, Format) and each
+  first-party item below must be present in its own menu -- File (New,
+  Open..., Save, Save As..., Close), Edit (Undo, Redo, Cut, Copy, Paste,
+  Select All, Clean Text), Find (Find..., Find and Replace...), and Format
+  (Font and Text Options). The check tolerates macOS's own menu injections
+  (Writing Tools, AutoFill, Start Dictation, Emoji & Symbols, and blank
+  separators in the Edit menu) since those vary by OS version and are not
+  part of this app's Commands declaration; only a missing first-party item
+  fails the run.
 
 ### Optional diagnostic: screenshot
 
